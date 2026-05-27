@@ -959,11 +959,13 @@ async function noSubmit() {
     const today = new Date().toISOString().split('T')[0];
     const fields = {};
     fields[F.orderId]   = orderId;
-    fields[F.orderCust] = [{ id: custIdStr }];
+    fields[F.orderCust] = [custIdStr];
     fields[F.orderDate] = today;
-    fields[F.orderRef]  = OW.rangeName.substring(0, 25);
+    fields[F.orderRef]  = OW.rangeName.replace(/[^\x00-\x7F]/g, '-').substring(0, 25);
     fields[F.orderStatus] = 'Draft';
     if (reqDate) fields[F.orderReqDate] = reqDate;
+    // Test: remove ref to isolate 422
+    delete fields[F.orderRef];
     console.log('Creating order payload:', JSON.stringify(fields));
     const newOrderId = await apiPost(T.orders, fields);
     console.log('Order created, ID:', newOrderId);
@@ -972,11 +974,11 @@ async function noSubmit() {
       const lineOrderId = String(newOrderId);
       const f = {
         [F.lineId]:    orderId+'-L'+(i+1),
-        [F.lineOrder]: [{ id: lineOrderId }],
+        [F.lineOrder]: [lineOrderId],
         [F.lineXS]: l.qtys[0]||0, [F.lineS]: l.qtys[1]||0, [F.lineM]: l.qtys[2]||0,
         [F.lineL]: l.qtys[3]||0, [F.lineXL]: l.qtys[4]||0,
       };
-      if (l.styleId) f[F.lineStyle] = [{ id: String(l.styleId) }];
+      if (l.styleId) f[F.lineStyle] = [String(l.styleId)];
       return { fields: f };
     });
     console.log('Saving lines:', JSON.stringify(recs[0]));
