@@ -970,15 +970,17 @@ async function noSubmit() {
     const newOrderId = await apiPost(T.orders, fields);
 
     const recs = lines.map((l,i) => {
+      const lineOrderId = String(newOrderId);
       const f = {
         [F.lineId]:    orderId+'-L'+(i+1),
-        [F.lineOrder]: [{ id: String(newOrderId) }],
+        [F.lineOrder]: [{ id: lineOrderId }],
         [F.lineXS]: l.qtys[0]||0, [F.lineS]: l.qtys[1]||0, [F.lineM]: l.qtys[2]||0,
         [F.lineL]: l.qtys[3]||0, [F.lineXL]: l.qtys[4]||0,
       };
       if (l.styleId) f[F.lineStyle] = [{ id: String(l.styleId) }];
       return { fields: f };
     });
+    console.log('Saving lines:', JSON.stringify(recs[0]));
     await apiPostBatch(T.lines, recs);
     noStatus('ok','✅ Order ' + orderId + ' saved — ' + lines.length + ' lines, ' + lines.reduce((s,l)=>s+l.total,0) + ' units');
     loadAll();
