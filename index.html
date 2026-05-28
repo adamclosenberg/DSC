@@ -792,6 +792,9 @@ async function noRangeChanged() {
     
     console.log('Style map keys:', Object.keys(OW.styleMap));
 
+    // Scroll to top so user can fill in customer and date before seeing grid
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     document.getElementById('no-grid-wrap').innerHTML =
       '<table class="ow-grid" id="no-grid"><thead><tr>' +
       '<th style="min-width:210px">Style · Colour</th>' +
@@ -983,8 +986,21 @@ async function noSubmit() {
     });
     console.log('Saving lines:', JSON.stringify(recs[0]));
     await apiPostBatch(T.lines, recs);
-    noStatus('ok','✅ Order ' + orderId + ' saved — ' + lines.length + ' lines, ' + lines.reduce((s,l)=>s+l.total,0) + ' units');
+    const totalUnits = lines.reduce((s,l)=>s+l.total,0);
+    noStatus('ok','✅ Order ' + orderId + ' saved — ' + lines.length + ' lines, ' + totalUnits + ' units');
     loadAll();
+    // Ask if user wants to capture another order
+    setTimeout(() => {
+      const another = confirm('✅ Order ' + orderId + ' saved successfully!\n\n' + lines.length + ' styles · ' + totalUnits + ' units\n\nCapture another order?');
+      if (another) {
+        noReset();
+        // Reset customer and date but keep range
+        document.getElementById('no-cust').value = '';
+        document.getElementById('no-date').value = '';
+        noStatus('', '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 500);
   } catch(e) { noStatus('err','❌ ' + e.message); }
   btn.disabled = false;
 }
