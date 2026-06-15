@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;900&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
-  --pink:#ff65c3; --pink-light:#ff85d0; --pink-pale:#fff0fa;
+  --pink:#ff65c3; --pink-light:#ff85d0; --pink-pale:#fff0fa; --pink-muted:#f0d0e4;
   --black:#111; --white:#fff; --off-white:#f7f7f7; --grey:#f2f2f2;
   --border:#ebebeb; --text:#111; --text-mid:#666; --text-light:#999;
   --green:#1a8a4a; --green-bg:#e8f7ee; --amber:#d97706; --amber-bg:#fef3c7;
@@ -132,8 +132,34 @@ table.dt tr:hover td{background:var(--pink-pale);}
 .ow-sel:focus,.ow-inp:focus{outline:none;border-color:var(--pink);}
 .ow-sel-wrap{position:relative;}
 .ow-sel-wrap::after{content:'▾';position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-light);pointer-events:none;font-size:12px;}
+.cust-combo{position:relative;}
+.cust-combo-input{cursor:text;}
+.cust-combo-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:280px;overflow-y:auto;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;}
+.cust-combo-list.open{display:block;}
+.cust-combo-opt{padding:9px 14px;font-size:13px;font-family:Montserrat,sans-serif;font-weight:500;color:var(--text);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cust-combo-opt:hover,.cust-combo-opt.active{background:var(--pink-bg,#fdf0f5);}
+.cust-combo-opt.sel{font-weight:700;}
+.cust-combo-empty{padding:9px 14px;font-size:12px;color:var(--text-light);font-style:italic;}
 
-/* ORDER GRID */
+/* REPORTS */
+.rpt-tbl{border-collapse:collapse;font-size:11px;font-family:Montserrat,sans-serif;min-width:100%;}
+.rpt-tbl thead tr{border-bottom:2px solid var(--border);}
+.rpt-tbl thead th{padding:5px 10px 8px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-light);font-weight:700;white-space:nowrap;}
+.rpt-tbl thead th.rpt-num{text-align:right;}
+.rpt-tbl thead th.rpt-sort{cursor:pointer;user-select:none;}
+.rpt-tbl thead th.rpt-sort:hover{color:var(--text);}
+.rpt-tbl td{padding:5px 10px;vertical-align:middle;border-bottom:1px solid #f5f5f5;white-space:nowrap;}
+.rpt-tbl td.rpt-num{text-align:right;font-family:'DM Mono',monospace;font-size:11px;}
+.rpt-tbl tr.rpt-detail:hover td{background:#fafafa;}
+.rpt-tbl tbody tr.rpt-subtotal td{background:var(--pink-muted);color:var(--text);font-weight:700;border-top:1px solid rgba(200,100,150,0.15);border-bottom:1px solid rgba(200,100,150,0.15);}
+.rpt-tbl tbody tr.rpt-subtotal td.rpt-num{color:var(--text);}
+.rpt-tbl tr.rpt-grand-spacer td{background:transparent;padding:4px 0;border:none;}
+.rpt-tbl tr.rpt-grand td{background:var(--text);color:white;font-weight:900;}
+.rpt-tbl tr.rpt-grand td.rpt-num{color:rgba(255,255,255,0.9);}
+.rpt-tbl .rpt-styleno{font-weight:800;font-size:11px;color:var(--text);font-family:'DM Mono',monospace;}
+.rpt-tbl .rpt-desc{font-weight:600;color:var(--text-mid);}
+.rpt-tbl .rpt-supp{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-light);}
+.rpt-empty{padding:40px 0;text-align:center;color:var(--text-light);font-size:13px;}
 .ow-grid{width:auto;border-collapse:collapse;margin-bottom:8px;}
 .ow-grid thead th{text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);padding:0 4px 8px 0;border-bottom:2px solid var(--border);}
 .ow-grid thead th.sz{text-align:center;width:52px;}
@@ -283,6 +309,7 @@ table.dt tr:hover td{background:var(--pink-pale);}
 @media(max-width:900px){.cs-gen-wrap{grid-template-columns:1fr;}}
 
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -295,9 +322,9 @@ table.dt tr:hover td{background:var(--pink-pale);}
 <header>
   <img src="data:image/png;base64,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" alt="Slick">
   <div class="hdr-right">
+    <button class="btn btn-s" onclick="hardReload()" id="hdr-reload-btn" title="Hard refresh — reloads the dashboard (latest code/design) and all Airtable data">↻ Reload</button>
     <div class="live"><div class="live-dot"></div>Live</div>
     <div id="last-upd">—</div>
-    <button class="ref-btn" onclick="location.reload(true)">↻ Refresh</button>
   </div>
 </header>
 
@@ -307,12 +334,13 @@ table.dt tr:hover td{background:var(--pink-pale);}
   <div class="tab" onclick="showTab('production',this)">Production</div>
   <div class="tab" onclick="showTab('fabric',this)">Fabric</div>
   <!-- <div class="tab" onclick="showTab('stylesetup',this)">Styles</div> -->
-  <div class="tab" onclick="showTab('neworder',this)"><i class="ti ti-plus"></i> Order</div>
-  <div class="tab" onclick="showTab('cutsheet',this)"><i class="ti ti-plus"></i> Cut Sheet</div>
-  <div class="tab" onclick="showTab('ctregister',this)"><i class="ti ti-printer"></i> Cut Sheet</div>
-  <div class="tab" onclick="showTab('cutsheets',this)"><i class="ti ti-plus"></i> Prod Sheet</div>
-  <div class="tab" onclick="showTab('register',this)"><i class="ti ti-printer"></i> Prod Sheet</div>
+  <div class="tab" onclick="showTab('neworder',this)"><i class="ti ti-plus"></i>Order</div>
+  <div class="tab" onclick="showTab('cutsheet',this)"><i class="ti ti-plus"></i>CS</div>
+  <div class="tab" onclick="showTab('ctregister',this)"><i class="ti ti-printer"></i> CS</div>
+  <div class="tab" onclick="showTab('cutsheets',this)"><i class="ti ti-plus"></i>PS</div>
+  <div class="tab" onclick="showTab('register',this)"><i class="ti ti-printer"></i> PS</div>
   <div class="tab" onclick="showTab('customers',this)">Customers</div>
+  <div class="tab" onclick="showTab('reports',this)">Reports</div>
 </nav>
 
 <div class="main">
@@ -410,6 +438,7 @@ table.dt tr:hover td{background:var(--pink-pale);}
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;padding-top:16px;border-top:1px solid var(--border);">
       <span id="rm-msg" style="font-size:12px;color:#dc2626;flex:1;"></span>
+      <button class="btn btn-s" id="rm-archive-btn" onclick="rangeModalArchive()" style="display:none;color:#d97706;border-color:#d97706;">Archive Range</button>
       <button class="btn btn-s" onclick="rangeModalClose()">Cancel</button>
       <button class="btn btn-p" id="rm-save-btn" onclick="rangeModalSave()">Save</button>
     </div>
@@ -557,16 +586,16 @@ table.dt tr:hover td{background:var(--pink-pale);}
       <select id="ord-filter-status" onchange="renderOrders()"
         style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
         <option value="">All Statuses</option>
+        <option value="Draft">Draft</option>
         <option value="Confirmed">Confirmed</option>
-        <option value="On Hold">On Hold</option>
-        <option value="Cancelled">Cancelled</option>
+        <option value="Archived">Archived</option>
       </select>
-      <button class="btn btn-s" onclick="pastelModalOpen()" title="Export confirmed orders to Pastel CSV"
+      <button class="btn btn-p" onclick="pastelModalOpen()" title="Export confirmed orders to Pastel CSV"
         style="font-size:11px;padding:6px 12px;">↓ Export Orders CSV</button>
     </div>
   </div>
   <div class="panel" style="overflow-x:auto;margin-top:8px;">
-    <table style="width:100%;border-collapse:collapse;min-width:800px;">
+    <table style="width:100%;border-collapse:collapse;min-width:960px;">
       <thead>
         <tr style="border-bottom:2px solid var(--border);background:var(--off-white);">
           <th onclick="ordSort('id')"    class="ord-th" style="padding:10px 12px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);cursor:pointer;user-select:none;white-space:nowrap;">Order ID <span id="ord-sort-id"></span></th>
@@ -687,29 +716,35 @@ table.dt tr:hover td{background:var(--pink-pale);}
 
 <!-- PRODUCTION -->
 <div class="page" id="page-production">
-  <div class="sec-hdr" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+  <div class="sec-hdr">
     <div>
       <div class="sec-ttl">Production</div>
       <div class="sec-sub" id="prod-sub">Loading...</div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <select id="prod-range" onchange="renderProd()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
-        <option value="">All Ranges</option>
-      </select>
-    </div>
   </div>
   <div class="stats" id="prod-stats"></div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+    <select id="prod-range" onchange="renderProd()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
+      <option value="">All Ranges</option>
+    </select>
+    <select id="prod-status" onchange="renderProd()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
+      <option value="">All Statuses</option>
+      <option value="Draft">Draft</option>
+      <option value="Issued">Issued</option>
+      <option value="Archived">Archived</option>
+    </select>
+  </div>
   <div class="panel"><div class="panel-hdr"><div class="panel-ttl">Production Sheet Summary</div></div><div class="panel-bod" style="overflow-x:auto;">
     <table class="dt" style="min-width:900px;">
       <thead><tr>
         <th onclick="prodSort('no')"    class="ord-th" style="cursor:pointer;user-select:none;white-space:nowrap;">Style Code <span id="prod-sort-no"></span></th>
         <th onclick="prodSort('desc')"  class="ord-th" style="cursor:pointer;user-select:none;white-space:nowrap;">Description <span id="prod-sort-desc"></span></th>
         <th onclick="prodSort('colour')" class="ord-th" style="cursor:pointer;user-select:none;white-space:nowrap;">Colour <span id="prod-sort-colour"></span></th>
-        <th onclick="prodSort('xs')"    class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">XS <span id="prod-sort-xs"></span></th>
-        <th onclick="prodSort('s')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">S <span id="prod-sort-s"></span></th>
-        <th onclick="prodSort('m')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">M <span id="prod-sort-m"></span></th>
-        <th onclick="prodSort('l')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">L <span id="prod-sort-l"></span></th>
-        <th onclick="prodSort('xl')"    class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">XL <span id="prod-sort-xl"></span></th>
+        <th onclick="prodSort('xs')"    class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">Sz 1 <span id="prod-sort-xs"></span></th>
+        <th onclick="prodSort('s')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">Sz 2 <span id="prod-sort-s"></span></th>
+        <th onclick="prodSort('m')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">Sz 3 <span id="prod-sort-m"></span></th>
+        <th onclick="prodSort('l')"     class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">Sz 4 <span id="prod-sort-l"></span></th>
+        <th onclick="prodSort('xl')"    class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">Sz 5 <span id="prod-sort-xl"></span></th>
         <th onclick="prodSort('total')" class="ord-th" style="text-align:center;cursor:pointer;user-select:none;white-space:nowrap;">Total <span id="prod-sort-total"></span></th>
         <th>Orders</th>
         <th onclick="prodSort('cs')"    class="ord-th" style="text-align:center;cursor:pointer;user-select:none;">CS <span id="prod-sort-cs"></span></th>
@@ -729,7 +764,11 @@ table.dt tr:hover td{background:var(--pink-pale);}
     <div style="display:flex;gap:8px;align-items:center;">
       <input type="text" id="fab-search" placeholder="Search fabric…" oninput="fabricRender()"
         style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;width:160px;">
-      <button class="btn btn-s" onclick="fabricLoad()" style="font-size:11px;padding:6px 12px;">↻ Reload</button>
+      <select id="fab-status" onchange="fabricLoad()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
+        <option value="">All Statuses</option>
+        <option value="Active">Active</option>
+        <option value="Archived">Archived</option>
+      </select>
       <button class="btn btn-s" onclick="recalcFabricCommitted()" id="fab-recalc-btn" style="font-size:11px;padding:6px 12px;" title="Recalculate committed metres from all order lines and update Airtable">⟳ Recalc Committed</button>
     </div>
   </div>
@@ -756,6 +795,28 @@ table.dt tr:hover td{background:var(--pink-pale);}
 </div>
 
 <!-- CUSTOMERS -->
+<div class="page" id="page-reports">
+  <div class="sec-hdr"><div class="sec-ttl">Reports</div><div class="sec-sub" id="rpt-sub">Select a range and report</div></div>
+  <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:20px;">
+    <div class="ow-field" style="width:280px;">
+      <div class="ow-lbl">Report</div>
+      <div class="ow-sel-wrap"><select class="ow-sel" id="rpt-type" onchange="renderCurrentReport()">
+        <option value="qty-by-style">Qty by Style #</option>
+        <option value="packing-list">Packing List by Customer</option>
+        <option value="order-sheet">Order Sheet by Customer</option>
+      </select></div>
+    </div>
+    <div class="ow-field" style="width:280px;">
+      <div class="ow-lbl">Range</div>
+      <div class="ow-sel-wrap"><select class="ow-sel" id="rpt-range" onchange="renderCurrentReport()"><option value="">All Ranges</option></select></div>
+    </div>
+    <div style="display:flex;gap:8px;padding-bottom:1px;">
+      <button class="btn btn-p" onclick="exportCurrentReport()" id="rpt-export-btn" style="font-size:11px;padding:7px 14px;">↓ Export XLSX</button>
+    </div>
+  </div>
+  <div id="rpt-content" style="overflow-x:auto;"></div>
+</div>
+
 <div class="page" id="page-customers">
   <div class="sec-hdr"><div class="sec-ttl">Customers</div><div class="sec-sub" id="cust-sub">Loading...</div></div>
   <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
@@ -785,7 +846,7 @@ table.dt tr:hover td{background:var(--pink-pale);}
     <div class="act-card"><span class="act-icon">📤</span><div class="act-ttl">Export to Pastel</div><div class="act-desc">Pulls all Confirmed orders, generates the Pastel Express v19 CSV import file, saves to Google Drive.</div><div class="btn-grp"><button class="btn btn-s" onclick="copyTxt('export orders to Pastel',this)">Copy Prompt</button></div><div class="act-info">Say "export orders to Pastel" in Claude → CSV saved to Google Drive → import via Process › Customers › Batch › Import.</div></div>
     <div class="act-card"><span class="act-icon">✂️</span><div class="act-ttl">Generate Production Sheets</div><div class="act-desc">Aggregates order lines by style+colourway, calculates size breakdowns and fabric requirements, outputs a PDF to Google Drive.</div><div class="btn-grp"><button class="btn btn-s" onclick="copyTxt('generate production sheets',this)">Copy Prompt</button></div><div class="act-info">Say "generate production sheets" in Claude → PDF saved to Google Drive.</div></div>
     <div class="act-card"><span class="act-icon">📊</span><div class="act-ttl">Order Summary Report</div><div class="act-desc">Full season summary — orders by customer, units by style, size ratios, revenue — as a PDF to Google Drive.</div><div class="btn-grp"><button class="btn btn-s" onclick="copyTxt('generate order summary report',this)">Copy Prompt</button></div><div class="act-info">Say "generate order summary report" in Claude → PDF saved to Google Drive.</div></div>
-    <div class="act-card"><span class="act-icon">🔄</span><div class="act-ttl">Refresh Dashboard</div><div class="act-desc">Dashboard pulls live data from Airtable on every load. Hit Refresh anytime for the latest numbers.</div><div class="btn-grp"><button class="btn btn-p" onclick="loadAll()">↻ Refresh Now</button></div></div>
+    
   </div>
   <div class="prompt-box"><div class="prompt-lbl">Quick Prompts — click to copy</div><div class="prompt-chips">
     <div class="p-chip" onclick="copyChip(this)">"export orders to Pastel"</div>
@@ -800,9 +861,14 @@ table.dt tr:hover td{background:var(--pink-pale);}
 <!-- NEW ORDER -->
 <div class="page" id="page-neworder">
   <div class="sec-hdr"><div class="sec-ttl">New Order</div><div class="sec-sub" id="no-sub">Select range to begin</div></div>
-  <div class="ow-hdr">
+  <div class="ow-hdr" style="grid-template-columns:1fr 1fr 1fr 1fr;">
     <div class="ow-field"><div class="ow-lbl">Range</div><div class="ow-sel-wrap"><select class="ow-sel" id="no-range" onchange="noRangeChanged()"><option value="">— Select range —</option></select></div></div>
-    <div class="ow-field"><div class="ow-lbl">Customer</div><div class="ow-sel-wrap"><select class="ow-sel" id="no-cust"><option value="">— Select customer —</option></select></div></div>
+    <div class="ow-field"><div class="ow-lbl">Style</div><div class="ow-sel-wrap"><select class="ow-sel" id="no-style-search" onchange="noFilterStyles(this.value)" disabled><option value="">— All styles —</option></select></div></div>
+    <div class="ow-field"><div class="ow-lbl">Customer</div><div class="cust-combo" id="no-cust-combo">
+      <input type="text" class="ow-inp cust-combo-input" id="no-cust-input" placeholder="— Select customer —" autocomplete="off" onfocus="custComboOpen()" oninput="custComboFilter(this.value)" onkeydown="custComboKey(event)">
+      <input type="hidden" id="no-cust">
+      <div class="cust-combo-list" id="no-cust-list"></div>
+    </div></div>
     <div class="ow-field"><div class="ow-lbl">Required Date</div><input type="date" class="ow-inp" id="no-date"></div>
   </div>
   <div id="no-grid-wrap" style="display:none">
@@ -989,39 +1055,32 @@ table.dt tr:hover td{background:var(--pink-pale);}
       <div class="sec-sub" id="reg-sub">Loading…</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <select id="reg-range" onchange="regRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
+      <select id="reg-range" onchange="regRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;min-width:140px;">
         <option value="">All Ranges</option>
       </select>
-      <select id="reg-filter" onchange="regRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
-        <option value="__nottrash__" selected>All (excl. Trash)</option>
-        <option value="">All (incl. Trash)</option>
-        <option value="Pending">Pending</option>
+      <select id="reg-filter" onchange="regLoaded=false;regLoadCMTs().then(()=>regLoad())" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;min-width:140px;">
+        <option value="" selected>All Statuses</option>
+        <option value="Draft">Draft</option>
         <option value="Issued">Issued</option>
-        <option value="Trash">Trash</option>
+        <option value="Archived">Archived</option>
       </select>
-      <select id="reg-sort" onchange="regRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
-        <option value="style-colour" selected>Sort: Style · Colour</option>
-        <option value="colour-style">Sort: Colour · Style</option>
-        <option value="date">Sort: Date (newest)</option>
-      </select>
-      <button class="btn btn-s" onclick="regLoaded=false;regLoadCMTs().then(()=>regLoad())" style="font-size:11px;padding:6px 12px;">↻ Reload</button>
-      <button id="reg-bulk-btn" onclick="regBulkIssue()" disabled style="font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:white;font-family:Montserrat,sans-serif;font-weight:700;cursor:pointer;color:var(--text-light);">✓ Mark Issued (0)</button>
+            <button id="reg-bulk-btn" onclick="regBulkIssue()" disabled style="font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:white;font-family:Montserrat,sans-serif;font-weight:700;cursor:pointer;color:var(--text-light);">✓ Mark Issued (0)</button>
     </div>
   </div>
 
   <div class="panel" style="overflow-x:auto;margin-top:8px;">
-    <table style="width:100%;border-collapse:collapse;min-width:800px;" id="reg-table">
+    <table style="width:100%;border-collapse:collapse;min-width:960px;" id="reg-table">
       <thead>
         <tr style="border-bottom:2px solid var(--border);background:var(--off-white);">
           <th style="padding:10px 12px;text-align:center;width:44px;"><input type="checkbox" id="reg-select-all" onchange="regSelectAll(this.checked)" style="accent-color:var(--pink);width:15px;height:15px;cursor:pointer;"></th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Style</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Colour</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">CMT</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Date</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:116px;">Status</th>
-          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:52px;">Units</th>
-          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:54px;">Mtrs</th>
-          <th style="padding:10px 12px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:80px;">Actions</th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:left;min-width:180px;cursor:pointer;user-select:none;" onclick="regSortBy('style')">Style <span id="reg-sort-style"></span></th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:left;min-width:120px;cursor:pointer;user-select:none;" onclick="regSortBy('colour')">Colour <span id="reg-sort-colour"></span></th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:left;min-width:100px;">CMT</th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:left;min-width:80px;white-space:nowrap;cursor:pointer;user-select:none;" onclick="regSortBy('date')">Date <span id="reg-sort-date"></span></th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:left;min-width:120px;white-space:nowrap;">Status</th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:right;width:60px;white-space:nowrap;">Units</th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:right;width:80px;white-space:nowrap;">Fabric Req.</th>
+          <th style="padding:10px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);text-align:center;width:100px;white-space:nowrap;">Actions</th>
         </tr>
       </thead>
       <tbody id="reg-body">
@@ -1106,6 +1165,7 @@ table.dt tr:hover td{background:var(--pink-pale);}
             <!-- Washcare removed -->
             <!-- Trims removed -->
             <div class="cs-field"><div class="cs-lbl">Fabric Code</div><div class="cs-val mono" id="ct-fabric">—</div></div>
+            <div class="cs-field"><div class="cs-lbl">Pattern #</div><div class="cs-val mono" id="ct-pattern-display">—</div></div>
             <div class="cs-field"><div class="cs-lbl">Cutter <span style="color:#dc2626">*</span></div>
               <select class="cs-inp" id="ct-cutter" style="font-family:var(--font-sans);color:#dc2626;" onchange="this.style.color=this.value?'var(--text)':'#dc2626'">
                 <option value="" style="color:#dc2626;">— select cutter —</option>
@@ -1192,38 +1252,31 @@ table.dt tr:hover td{background:var(--pink-pale);}
       <div class="sec-sub" id="ctreg-sub">Loading…</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <select id="ctreg-range" onchange="ctregRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
+      <select id="ctreg-range" onchange="ctregRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;min-width:140px;">
         <option value="">All Ranges</option>
       </select>
-      <select id="ctreg-filter" onchange="ctregRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
-        <option value="__nottrash__">All (excl. Trash)</option>
-        <option value="">All incl. Trash</option>
-        <option value="Pending">Pending</option>
+      <select id="ctreg-filter" onchange="ctregLoad()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;min-width:140px;">
+        <option value="" selected>All Statuses</option>
+        <option value="Draft">Draft</option>
         <option value="Issued">Issued</option>
       </select>
-      <select id="ctreg-sort" onchange="ctregRender()" style="font-size:11px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Montserrat,sans-serif;font-weight:600;color:var(--text-mid);background:white;cursor:pointer;">
-        <option value="style-colour">Sort: Style › Colour</option>
-        <option value="colour-style">Sort: Colour › Style</option>
-        <option value="date">Sort: Date (newest)</option>
-      </select>
-      <button class="btn btn-s" onclick="ctregLoad()" style="font-size:11px;padding:6px 12px;">↻ Reload</button>
       <button id="ctreg-bulk-btn" onclick="ctregBulkIssue()" disabled style="font-size:11px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:white;font-family:Montserrat,sans-serif;font-weight:700;cursor:pointer;color:var(--text-light);">✓ Mark Issued (0)</button>
     </div>
   </div>
 
   <div class="panel" style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;min-width:800px;">
+    <table style="width:100%;border-collapse:collapse;min-width:960px;">
       <thead>
         <tr style="border-bottom:2px solid var(--border);background:var(--off-white);">
           <th style="padding:10px 12px;text-align:center;width:44px;"><input type="checkbox" id="ctreg-select-all" onchange="ctregSelectAll(this.checked)" style="accent-color:var(--pink);width:15px;height:15px;cursor:pointer;"></th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">ID</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Colour</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Cutter</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);">Date</th>
-          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:116px;">Status</th>
-          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:52px;">Units</th>
-          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:54px;">Mtrs</th>
-          <th style="padding:10px 12px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:80px;">Actions</th>
+          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);min-width:180px;cursor:pointer;user-select:none;" onclick="ctregSortBy('style')">ID <span id="ctreg-sort-style"></span></th>
+          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);min-width:120px;cursor:pointer;user-select:none;" onclick="ctregSortBy('colour')">Colour <span id="ctreg-sort-colour"></span></th>
+          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);min-width:100px;">Cutter</th>
+          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);min-width:80px;white-space:nowrap;cursor:pointer;user-select:none;" onclick="ctregSortBy('date')">Date <span id="ctreg-sort-date"></span></th>
+          <th style="padding:10px 8px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:120px;white-space:nowrap;">Status</th>
+          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:60px;white-space:nowrap;">Units</th>
+          <th style="padding:10px 8px;text-align:right;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:80px;white-space:nowrap;">Fabric Req.</th>
+          <th style="padding:10px 12px;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--text-light);width:100px;white-space:nowrap;">Actions</th>
         </tr>
       </thead>
       <tbody id="ctreg-body">
@@ -1319,6 +1372,7 @@ const F = {
   styleWash:   'fldF5WHfqFsz8jdWh', // multilineText
   styleIncl:   'fldf8lnGnxCUKQd5g', // currency
   styleFabric: 'fldDxwVua0DOytWQb', // multipleRecordLinks → Fabrics
+  styleCMT:    'fldPIE7xy1ay81UmY', // multipleRecordLinks → CMTs
   styleRating: 'fldRUdA7iRmKEFSGJ', // number — metres per unit
   styleNotes:  'fld4ze7WMesUmfWpu', // multilineText
   styleTrims:  'fldA6aebLCKlX6FZT', // richText
@@ -1328,8 +1382,13 @@ const F = {
   stylePastelCategory: 'fldiev7aMr4HyFrpE', // singleLineText
   styleBarcode:        'fldOL2CX84Cd5px1O', // singleLineText
 
+  // CMTs
+  cmtName:     'fldUo5NG0tFpOzIyh', // singleLineText
+  cmtCode:     'fldCqTTw3psXRKc50', // singleLineText — new field
+
   // Fabrics table
   fabricCode:  'fld8U2aG10Fbmu64M',
+  fabricStatus:'fldAvLm38wfGry5ZZ', // singleSelect — "Fabric Status"
   fabricDesc:  'flddjXmcYTZyiSuIB',  // singleSelect
   fabricColour:'fldoQziKT2DUzmqSA',  // singleSelect (Colourway)
   fabricSupplier:'fldKT7KGX5RgHgRkZ', // singleSelect
@@ -1365,8 +1424,25 @@ const F = {
 // ============================================================
 // API
 // ============================================================
-async function api(tableId, fieldIds) {
-  const params = 'returnFieldsByFieldId=true&' + fieldIds.map(id => 'fields[]=' + id).join('&');
+// Server-side archive filters — Airtable filterByFormula excludes Archived records
+const NOARCH = {
+  orders:    'NOT({Status}="Archived")',
+  ranges:    'NOT({Status}="Archived")',
+  styles:    'NOT({Status}="Archived")',
+  fabrics:   'NOT({Fabric Status}="Archived")',
+  cutsheets: 'NOT({CS & PS Status}="Archived")',
+};
+const ARCHONLY = {
+  orders:    '{Status}="Archived"',
+  ranges:    '{Status}="Archived"',
+  styles:    '{Status}="Archived"',
+  fabrics:   '{Fabric Status}="Archived"',
+  cutsheets: '{CS & PS Status}="Archived"',
+};
+
+async function api(tableId, fieldIds, filter) {
+  let params = 'returnFieldsByFieldId=true&' + fieldIds.map(id => 'fields[]=' + id).join('&');
+  if (filter) params += '&filterByFormula=' + encodeURIComponent(filter);
   let records = [], offset = null;
   do {
     const url = 'https://api.airtable.com/v0/' + BASE + '/' + tableId + '?' + params + (offset ? '&offset=' + offset : '');
@@ -1459,13 +1535,27 @@ function fmtRFull(n) {
 }
 
 function badge(s) {
-  const m = { Confirmed:'b-ok', Pending:'b-pend', Approved:'b-blue', Issued:'b-ok', Active:'b-ok', Draft:'b-pend', Trash:'b-pend' };
+  const m = { Confirmed:'b-ok', Pending:'b-pend', Draft:'b-pend', Approved:'b-blue', Issued:'b-ok', Active:'b-ok', Draft:'b-pend', Trash:'b-pend' };
   return '<span class="badge ' + (m[s] || 'b-pend') + '">' + (s||'—') + '</span>';
 }
 
 // ============================================================
 // LOAD
 // ============================================================
+// Hard refresh: reload the whole page (latest HTML/CSS/JS) AND all Airtable data.
+// Cache-busts via a query param so design/code changes always show.
+function hardReload() {
+  const btn = document.getElementById('hdr-reload-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Reloading…'; }
+  try {
+    const u = new URL(window.location.href);
+    u.searchParams.set('_', Date.now().toString());
+    window.location.replace(u.toString());
+  } catch (e) {
+    window.location.reload();
+  }
+}
+
 async function loadAll() {
   const loadEl = document.getElementById('loading');
   loadEl.style.display = 'flex';
@@ -1473,19 +1563,19 @@ async function loadAll() {
   showErr('');
   try {
     document.getElementById('loading-msg').textContent = 'Fetching orders...';
-    D.orders = await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore]);
+    D.orders    = await api(T.orders,    [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore], NOARCH.orders);
     document.getElementById('loading-msg').textContent = 'Fetching order lines...';
     D.lines = await api(T.lines, [F.lineId,F.lineOrder,F.lineStyle,F.lineXS,F.lineS,F.lineM,F.lineL,F.lineXL,F.lineTotal,F.lineExcl,F.lineIncl]);
     document.getElementById('loading-msg').textContent = 'Fetching customers...';
     D.customers = await api(T.customers, [F.custName,F.custCode,F.custContact,F.custPhone,F.custEmail,F.custStatus,F.custCity,F.custDelivAddr1,F.custDelivAddr2,F.custPostalCode]);
     document.getElementById('loading-msg').textContent = 'Fetching styles...';
-    D.styles = await api(T.styles, [F.styleNo,F.styleDesc,F.styleColour,F.styleExcl,F.styleIncl,F.styleFabric,F.styleRating,F.styleRange]);
+    D.styles    = await api(T.styles,    [F.styleNo,F.styleDesc,F.styleColour,F.styleExcl,F.styleIncl,F.styleFabric,F.styleRating,F.styleRange,F.styleCMT,F.styleStatus], NOARCH.styles);
     document.getElementById('loading-msg').textContent = 'Fetching ranges...';
-    D.ranges = await api(T.ranges, [F.rangeNo, F.rangeName, F.rangeSeason, F.rangeStatus, F.rangeLaunch, F.rangeDeadline, F.rangeDelivery, F.rangeNotes]);
+    D.ranges    = await api(T.ranges,    [F.rangeNo,F.rangeName,F.rangeSeason,F.rangeStatus,F.rangeLaunch,F.rangeDeadline,F.rangeDelivery,F.rangeNotes], NOARCH.ranges);
     document.getElementById('loading-msg').textContent = 'Fetching production sheets...';
-    D.cutsheets = await api(T.cutsheets, [F.csId,F.csStatus,F.csStyleName,F.csColour,F.csTotal,F.csXS,F.csS,F.csM,F.csL,F.csXL,'fld6SKRjatycQ8FFI']);
+    D.cutsheets = await api(T.cutsheets, [F.csId,F.csStatus,F.csStyleName,F.csColour,F.csTotal,F.csXS,F.csS,F.csM,F.csL,F.csXL,'fld6SKRjatycQ8FFI'], NOARCH.cutsheets);
     document.getElementById('loading-msg').textContent = 'Fetching fabrics...';
-    D.fabrics = await api(T.fabrics, [F.fabricCode,F.fabricDesc,F.fabricColour,F.fabricOnHand,F.fabricCommitted,F.fabricRemaining]);
+    D.fabrics   = await api(T.fabrics,   [F.fabricCode,F.fabricDesc,F.fabricColour,F.fabricOnHand,F.fabricCommitted,F.fabricRemaining,F.fabricStatus], NOARCH.fabrics);
     loadEl.style.display = 'none';
     try { renderAll(); } catch(re) { showErr('Render error: ' + re.message); console.error('renderAll:', re); }
     document.getElementById('last-upd').textContent = 'Updated ' + new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
@@ -1627,14 +1717,14 @@ function renderDash() {
   // Sizes — confirmed lines only
   let xs=0,s=0,m=0,l=0,xl=0;
   confirmedLines.forEach(ln => { xs+=nv(ln,F.lineXS); s+=nv(ln,F.lineS); m+=nv(ln,F.lineM); l+=nv(ln,F.lineL); xl+=nv(ln,F.lineXL); });
-  document.getElementById('sz-breakdown').innerHTML = [['XS',xs],['S',s],['M',m],['L',l],['XL',xl]]
+  document.getElementById('sz-breakdown').innerHTML = [['Sz 1',xs],['Sz 2',s],['Sz 3',m],['Sz 4',l],['Sz 5',xl]]
     .map(([sz,qty]) => '<div class="sz-cell"><div class="sz-name">'+sz+'</div><div class="sz-qty">'+qty+'</div></div>').join('');
 
   // Donut
-  const sc = { Pending:0, Issued:0 };
+  const sc = { Draft:0, Issued:0 };
   D.cutsheets.forEach(cs => { const st = sv(cs, F.csStatus) || 'Pending'; if (sc[st]!==undefined) sc[st]++; });
   document.getElementById('donut-num').textContent = D.cutsheets.length;
-  const dc = { Pending:'var(--pink)', Issued:'var(--green)' };
+  const dc = { Draft:'var(--pink)', Issued:'var(--green)' };
   document.getElementById('donut-leg').innerHTML = Object.entries(sc)
     .map(([st,cnt]) => '<div class="leg-row"><div class="leg-dot" style="background:'+dc[st]+'"></div>'+st+' ('+cnt+')</div>').join('');
 
@@ -1674,7 +1764,744 @@ function ordSort(col) {
   renderOrders();
 }
 
+/* ── ARCHIVE ─────────────────────────────────────────────────────────── */
+async function archiveRecord(tableId, recId, statusFid, displayName, reloadFn) {
+  if (!confirm('Archive "' + displayName + '"?\n\nIt will no longer appear in the dashboard. To restore it, change the status back to Active in Airtable.')) return;
+  try {
+    const url = 'https://api.airtable.com/v0/' + BASE + '/' + tableId + '/' + recId;
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { [statusFid]: 'Archived' }, typecast: true })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    await reloadFn();
+  } catch(e) {
+    alert('Archive failed: ' + e.message);
+  }
+}
+
+async function archiveOrder(recId, orderId, custName) {
+  await archiveRecord(T.orders, recId, F.orderStatus, orderId + ' – ' + custName, async () => {
+    D.orders = (await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore], NOARCH.orders));
+    D.lines = await api(T.lines, [F.lineId,F.lineOrder,F.lineStyle,F.lineXS,F.lineS,F.lineM,F.lineL,F.lineXL,F.lineTotal,F.lineExcl,F.lineIncl]);
+    renderOrders(); renderDash();
+  });
+}
+
+async function archiveSheet(recId, sheetId, isPS) {
+  await archiveRecord(T.cutsheets, recId, F.csStatus, sheetId, async () => {
+    if (isPS) regLoadCMTs().then(() => regLoad());
+    else ctregLoadCutters().then(() => ctregLoad());
+    D.cutsheets = await api(T.cutsheets, [F.csId,F.csStatus,F.csStyleName,F.csColour,F.csTotal,F.csXS,F.csS,F.csM,F.csL,F.csXL,'fld6SKRjatycQ8FFI'], NOARCH.cutsheets);
+    renderDash();
+  });
+}
+
+async function archiveRange(recId, rangeName) {
+  await archiveRecord(T.ranges, recId, F.rangeStatus, rangeName, async () => {
+    D.ranges = (await api(T.ranges, [F.rangeNo,F.rangeName,F.rangeSeason,F.rangeStatus,F.rangeLaunch,F.rangeDeadline,F.rangeDelivery,F.rangeNotes]))
+      .filter(r => (sv(r,F.rangeStatus)||'').toLowerCase() !== 'archived');
+    populateRangeDropdowns();
+    renderDash();
+    rangeModalClose();
+    // also refresh + Order range dropdown
+    const rng = document.getElementById('no-range');
+    if (rng) { const cur = rng.value; rng.innerHTML = '<option value="">— Select range —</option>'; D.ranges.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = (sv(r,F.rangeNo)||'') + ' · ' + (sv(r,F.rangeName)||''); rng.appendChild(o); }); if ([...rng.options].some(o=>o.value===cur)) rng.value=cur; }
+  });
+}
+
+let RPT_SORT = { dir: 'asc' };
+let RPT_DATA = null;
+
+function initReports() {
+  // Populate range dropdown
+  const sel = document.getElementById('rpt-range');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Ranges</option>';
+  const sorted = [...D.ranges].sort((a,b) => {
+    const an = a.fields[F.rangeNo]||'', bn = b.fields[F.rangeNo]||'';
+    return an.localeCompare(bn);
+  });
+  sorted.forEach(r => {
+    const no = sv(r, F.rangeNo)||''; const nm = sv(r, F.rangeName)||'';
+    const o = document.createElement('option');
+    o.value = r.id; o.textContent = no + (nm ? ' · ' + nm : '');
+    sel.appendChild(o);
+  });
+  sel.value = cur;
+  renderCurrentReport();
+}
+
+function renderQtyByStyle() {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+  if (!D.orders.length || !D.lines.length) {
+    content.innerHTML = '<div class="rpt-empty">Loading data…</div>'; return;
+  }
+  content.innerHTML = '<div class="rpt-empty" style="padding:20px 0;">Building report…</div>';
+
+  // Fetch CMTs (not in D), then render
+  api(T.cmts, [F.cmtName, F.cmtCode]).then(cmtRecs => {
+    _renderQtyByStyleInner(cmtRecs);
+  }).catch(() => _renderQtyByStyleInner([]));
+}
+
+function _renderQtyByStyleInner(cmtRecs) {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+
+  const rangeId = document.getElementById('rpt-range')?.value || '';
+
+  // Build lookup maps (same pattern as dashboard/production)
+  const orderMap = {};  D.orders.forEach(o  => { orderMap[o.id]  = o; });
+  const custMap  = {};  D.customers.forEach(c => { custMap[c.id]  = c; });
+  const styleMap = {};  D.styles.forEach(s   => { styleMap[s.id]  = s; });
+  const cmtMap   = {};  cmtRecs.forEach(c    => { cmtMap[c.id]    = c; });
+
+  // Aggregate per style record + customer
+  const rowMap = {};
+
+  D.lines.forEach(l => {
+    // Use gv + getLinkedId like the rest of the codebase
+    const styleLinks = gv(l, F.lineStyle) || [];
+    const orderLinks = gv(l, F.lineOrder) || [];
+    const styleId = getLinkedId(styleLinks[0]);
+    const orderId = getLinkedId(orderLinks[0]);
+    if (!styleId || !orderId) return;
+
+    const style = styleMap[styleId];
+    const order = orderMap[orderId];
+    if (!style || !order) return;
+
+    // Range filter
+    if (rangeId) {
+      const rangeLinks = gv(style, F.styleRange) || [];
+      if (getLinkedId(rangeLinks[0]) !== rangeId) return;
+    }
+
+    // Exclude cancelled orders
+    const status = sv(order, F.orderStatus) || '';
+    if (status.toLowerCase() === 'cancelled') return;
+
+    const custLinks = gv(order, F.orderCust) || [];
+    const custId = getLinkedId(custLinks[0]);
+    if (!custId) return;
+
+    const key = styleId + '|' + custId;
+    if (!rowMap[key]) {
+      const cust     = custMap[custId];
+      const cmtLinks = gv(style, F.styleCMT) || [];
+      const cmtId    = getLinkedId(cmtLinks[0]);
+      const suppCode = cmtId ? (sv(cmtMap[cmtId], F.cmtCode) || '') : '';
+      rowMap[key] = {
+        styleId,
+        styleNo:    sv(style, F.styleNo)    || '',
+        styleDesc:  sv(style, F.styleDesc)  || '',
+        styleColour:sv(style, F.styleColour)|| '',
+        suppCode,
+        custId,
+        custName: cust ? (sv(cust, F.custName) || '') : '',
+        sz1:0, sz2:0, sz3:0, sz4:0, sz5:0, total:0
+      };
+    }
+    const r = rowMap[key];
+    r.sz1 += nv(l, F.lineXS); r.sz2 += nv(l, F.lineS);
+    r.sz3 += nv(l, F.lineM);  r.sz4 += nv(l, F.lineL);
+    r.sz5 += nv(l, F.lineXL); r.total += nv(l, F.lineTotal);
+  });
+
+  // Group by style
+  const groups = {};
+  Object.values(rowMap).forEach(row => {
+    if (!groups[row.styleId]) {
+      groups[row.styleId] = {
+        styleNo: row.styleNo, styleDesc: row.styleDesc, suppCode: row.suppCode,
+        rows: [], t1:0, t2:0, t3:0, t4:0, t5:0, tot:0
+      };
+    }
+    const g = groups[row.styleId];
+    g.rows.push(row);
+    g.t1+=row.sz1; g.t2+=row.sz2; g.t3+=row.sz3; g.t4+=row.sz4; g.t5+=row.sz5; g.tot+=row.total;
+  });
+
+  if (!Object.keys(groups).length) {
+    content.innerHTML = '<div class="rpt-empty">No orders found' + (rangeId ? ' for this range' : '') + '.</div>';
+    document.getElementById('rpt-sub').textContent = 'No data';
+    return;
+  }
+
+  // Sort style groups by style number
+  const sortedIds = Object.keys(groups).sort((a, b) => {
+    const cmp = groups[a].styleNo.localeCompare(groups[b].styleNo, undefined, {numeric:true});
+    return RPT_SORT.dir === 'asc' ? cmp : -cmp;
+  });
+
+  // Sort rows within each group by customer then colour
+  sortedIds.forEach(sid => {
+    groups[sid].rows.sort((a,b) => a.custName.localeCompare(b.custName) || a.styleColour.localeCompare(b.styleColour));
+  });
+
+  // Grand totals
+  let gt1=0,gt2=0,gt3=0,gt4=0,gt5=0,gtot=0;
+  sortedIds.forEach(sid => { const g=groups[sid]; gt1+=g.t1;gt2+=g.t2;gt3+=g.t3;gt4+=g.t4;gt5+=g.t5;gtot+=g.tot; });
+
+  const sortArrow = RPT_SORT.dir === 'asc' ? ' ↑' : ' ↓';
+  const fmtN = n => n ? String(n) : '—';
+
+  let html = '<table class="rpt-tbl">';
+  html += '<thead><tr>'
+    + '<th class="rpt-sort" onclick="rptToggleSort()">Style No' + sortArrow + '</th>'
+    + '<th>Description</th>'
+    + '<th>CMT Code</th>'
+    + '<th>Customer</th>'
+    + '<th>Colourway</th>'
+    + '<th class="rpt-num">Sz 1</th><th class="rpt-num">Sz 2</th><th class="rpt-num">Sz 3</th>'
+    + '<th class="rpt-num">Sz 4</th><th class="rpt-num">Sz 5</th>'
+    + '<th class="rpt-num">Total</th>'
+    + '</tr></thead><tbody>';
+
+  sortedIds.forEach(sid => {
+    const g = groups[sid];
+    g.rows.forEach((row, i) => {
+      html += '<tr class="rpt-detail">'
+        + (i===0 ? '<td class="rpt-styleno">' + g.styleNo + '</td>' : '<td></td>')
+        + (i===0 ? '<td class="rpt-desc">'    + g.styleDesc + '</td>' : '<td></td>')
+        + (i===0 ? '<td class="rpt-supp">'    + (g.suppCode||'—') + '</td>' : '<td></td>')
+        + '<td style="font-size:11px;font-weight:600;color:var(--text-mid);">' + row.custName + '</td>'
+        + '<td style="font-size:11px;color:var(--text-mid);">' + row.styleColour + '</td>'
+        + '<td class="rpt-num">' + fmtN(row.sz1) + '</td>'
+        + '<td class="rpt-num">' + fmtN(row.sz2) + '</td>'
+        + '<td class="rpt-num">' + fmtN(row.sz3) + '</td>'
+        + '<td class="rpt-num">' + fmtN(row.sz4) + '</td>'
+        + '<td class="rpt-num">' + fmtN(row.sz5) + '</td>'
+        + '<td class="rpt-num" style="font-weight:700;">' + fmtN(row.total) + '</td>'
+        + '</tr>';
+    });
+    html += '<tr class="rpt-subtotal">'
+      + '<td colspan="5" style="font-size:10px;letter-spacing:1px;">' + g.styleNo + ' TOTAL</td>'
+      + '<td class="rpt-num">' + fmtN(g.t1) + '</td><td class="rpt-num">' + fmtN(g.t2) + '</td>'
+      + '<td class="rpt-num">' + fmtN(g.t3) + '</td><td class="rpt-num">' + fmtN(g.t4) + '</td>'
+      + '<td class="rpt-num">' + fmtN(g.t5) + '</td><td class="rpt-num">' + fmtN(g.tot) + '</td>'
+      + '</tr>';
+  });
+
+  html += '<tr class="rpt-grand-spacer"><td colspan="11"></td></tr>';
+  html += '<tr class="rpt-grand">'
+    + '<td colspan="5" style="font-size:10px;letter-spacing:2px;">GRAND TOTAL</td>'
+    + '<td class="rpt-num">' + gt1 + '</td><td class="rpt-num">' + gt2 + '</td>'
+    + '<td class="rpt-num">' + gt3 + '</td><td class="rpt-num">' + gt4 + '</td>'
+    + '<td class="rpt-num">' + gt5 + '</td><td class="rpt-num">' + gtot + '</td>'
+    + '</tr>';
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+
+  const totalStyles = sortedIds.length;
+  const totalRows = Object.values(groups).reduce((s,g) => s + g.rows.length, 0);
+  document.getElementById('rpt-sub').textContent =
+    totalStyles + ' style' + (totalStyles!==1?'s':'') + ' · ' + totalRows + ' lines · ' + gtot + ' total units';
+
+  // Store for export
+  RPT_DATA = { sortedIds, groups, gt1, gt2, gt3, gt4, gt5, gtot, type:'qty-by-style' };
+  const exportBtn = document.getElementById('rpt-export-btn');
+  if (exportBtn) exportBtn.disabled = false;
+}
+
+function exportQtyByStyleXLSX() {
+  if (!RPT_DATA || typeof XLSX === 'undefined') return;
+  const { sortedIds, groups, gt1, gt2, gt3, gt4, gt5, gtot } = RPT_DATA;
+
+  // Build array-of-arrays
+  const aoa = [];
+  // Header
+  aoa.push(['Style No','Description','CMT Code','Customer','Colourway','Sz 1','Sz 2','Sz 3','Sz 4','Sz 5','Total']);
+
+  sortedIds.forEach(sid => {
+    const g = groups[sid];
+    g.rows.forEach((row, i) => {
+      aoa.push([
+        i===0 ? g.styleNo   : '',
+        i===0 ? g.styleDesc : '',
+        i===0 ? (g.suppCode||'') : '',
+        row.custName,
+        row.styleColour,
+        row.sz1||'', row.sz2||'', row.sz3||'', row.sz4||'', row.sz5||'',
+        row.total||''
+      ]);
+    });
+    // Subtotal row
+    aoa.push([g.styleNo + ' TOTAL','','','','', g.t1, g.t2, g.t3, g.t4, g.t5, g.tot]);
+  });
+  // Grand total
+  aoa.push(['GRAND TOTAL','','','','', gt1, gt2, gt3, gt4, gt5, gtot]);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:12},{wch:32},{wch:14},{wch:30},{wch:22},
+    {wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:8}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const rangeEl = document.getElementById('rpt-range');
+  const rangeLabel = rangeEl?.options[rangeEl.selectedIndex]?.text || 'All Ranges';
+  XLSX.utils.book_append_sheet(wb, ws, 'Qty by Style');
+
+  const date = new Date().toISOString().slice(0,10);
+  const filename = 'Qty_by_Style_' + rangeLabel.replace(/[^a-zA-Z0-9]/g,'_') + '_' + date + '.xlsx';
+  XLSX.writeFile(wb, filename);
+}
+
+function renderCurrentReport() {
+  const type = document.getElementById('rpt-type')?.value || 'qty-by-style';
+  RPT_DATA = null;
+  const exportBtn = document.getElementById('rpt-export-btn');
+  if (exportBtn) exportBtn.disabled = true;
+  if (type === 'packing-list') renderPackingList();
+  else if (type === 'order-sheet') renderOrderSheet();
+  else renderQtyByStyle();
+}
+
+function exportCurrentReport() {
+  if (!RPT_DATA) return;
+  if (RPT_DATA.type === 'packing-list') exportPackingListXLSX();
+  else if (RPT_DATA.type === 'order-sheet') exportOrderSheetXLSX();
+  else exportQtyByStyleXLSX();
+}
+
+function rptToggleSort() {
+  RPT_SORT.dir = RPT_SORT.dir === 'asc' ? 'desc' : 'asc';
+  renderCurrentReport();
+}
+
+/* ── SHARED: build customer → style groups ────── */
+function _buildCustGroups(cmtRecs, rangeId) {
+  const orderMap = {}; D.orders.forEach(o  => { orderMap[o.id]  = o; });
+  const custMap  = {}; D.customers.forEach(c => { custMap[c.id]  = c; });
+  const styleMap = {}; D.styles.forEach(s   => { styleMap[s.id]  = s; });
+  const cmtMap   = {}; cmtRecs.forEach(c    => { cmtMap[c.id]    = c; });
+
+  const rowMap = {};
+  D.lines.forEach(l => {
+    const styleLinks = gv(l, F.lineStyle) || [];
+    const orderLinks = gv(l, F.lineOrder) || [];
+    const styleId = getLinkedId(styleLinks[0]);
+    const orderId = getLinkedId(orderLinks[0]);
+    if (!styleId || !orderId) return;
+    const style = styleMap[styleId];
+    const order = orderMap[orderId];
+    if (!style || !order) return;
+    if (rangeId) {
+      const rl = gv(style, F.styleRange) || [];
+      if (getLinkedId(rl[0]) !== rangeId) return;
+    }
+    const status = sv(order, F.orderStatus) || '';
+    if (status.toLowerCase() === 'cancelled') return;
+    const custLinks = gv(order, F.orderCust) || [];
+    const custId = getLinkedId(custLinks[0]);
+    if (!custId) return;
+
+    const key = custId + '|' + styleId;
+    if (!rowMap[key]) {
+      const cust     = custMap[custId];
+      const cmtLinks = gv(style, F.styleCMT) || [];
+      const cmtId    = getLinkedId(cmtLinks[0]);
+      const cmtCode  = cmtId ? (sv(cmtMap[cmtId], F.cmtCode) || '') : '';
+      rowMap[key] = {
+        custId, custName: cust ? (sv(cust, F.custName)||'') : '',
+        styleId, styleNo: sv(style,F.styleNo)||'',
+        styleDesc: sv(style,F.styleDesc)||'',
+        styleColour: sv(style,F.styleColour)||'',
+        cmtCode,
+        exclPrice: nv(style, F.styleExcl) || 0,
+        inclPrice: nv(style, F.styleIncl) || 0,
+        sz1:0, sz2:0, sz3:0, sz4:0, sz5:0, total:0
+      };
+    }
+    const r = rowMap[key];
+    r.sz1 += nv(l,F.lineXS); r.sz2 += nv(l,F.lineS);
+    r.sz3 += nv(l,F.lineM);  r.sz4 += nv(l,F.lineL);
+    r.sz5 += nv(l,F.lineXL); r.total += nv(l,F.lineTotal);
+  });
+
+  const custGroups = {};
+  Object.values(rowMap).forEach(row => {
+    if (!custGroups[row.custId]) {
+      custGroups[row.custId] = {
+        custName: row.custName, styleGroups: {},
+        ct1:0, ct2:0, ct3:0, ct4:0, ct5:0, ctot:0, cval:0
+      };
+    }
+    const cg = custGroups[row.custId];
+    if (!cg.styleGroups[row.styleId]) {
+      cg.styleGroups[row.styleId] = {
+        styleNo: row.styleNo, styleDesc: row.styleDesc,
+        cmtCode: row.cmtCode, exclPrice: row.exclPrice,
+        inclPrice: row.inclPrice, rows: []
+      };
+    }
+    cg.styleGroups[row.styleId].rows.push(row);
+    cg.ct1+=row.sz1; cg.ct2+=row.sz2; cg.ct3+=row.sz3;
+    cg.ct4+=row.sz4; cg.ct5+=row.sz5; cg.ctot+=row.total;
+    cg.cval += row.total * row.exclPrice;
+  });
+  return custGroups;
+}
+
+/* ── ORDER SHEET BY CUSTOMER ──────────────────── */
+function renderOrderSheet() {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+  if (!D.orders.length || !D.lines.length) {
+    content.innerHTML = '<div class="rpt-empty">Loading data…</div>'; return;
+  }
+  content.innerHTML = '<div class="rpt-empty" style="padding:20px 0;">Building report…</div>';
+  api(T.cmts, [F.cmtName, F.cmtCode]).then(cmtRecs => {
+    _renderOrderSheetInner(cmtRecs);
+  }).catch(() => _renderOrderSheetInner([]));
+}
+
+function _renderOrderSheetInner(cmtRecs) {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+  const rangeId = document.getElementById('rpt-range')?.value || '';
+  const custGroups = _buildCustGroups(cmtRecs, rangeId);
+
+  if (!Object.keys(custGroups).length) {
+    content.innerHTML = '<div class="rpt-empty">No orders found' + (rangeId ? ' for this range' : '') + '.</div>';
+    document.getElementById('rpt-sub').textContent = 'No data';
+    return;
+  }
+
+  const sortedCusts = Object.keys(custGroups).sort((a,b) => {
+    const cmp = custGroups[a].custName.localeCompare(custGroups[b].custName);
+    return RPT_SORT.dir === 'asc' ? cmp : -cmp;
+  });
+  sortedCusts.forEach(cid => {
+    Object.keys(custGroups[cid].styleGroups).forEach(sid => {
+      custGroups[cid].styleGroups[sid].rows.sort((a,b) => a.styleColour.localeCompare(b.styleColour));
+    });
+  });
+
+  let gt1=0,gt2=0,gt3=0,gt4=0,gt5=0,gtot=0,gval=0;
+  sortedCusts.forEach(cid => { const c=custGroups[cid]; gt1+=c.ct1;gt2+=c.ct2;gt3+=c.ct3;gt4+=c.ct4;gt5+=c.ct5;gtot+=c.ctot;gval+=c.cval; });
+
+  const sortArrow = RPT_SORT.dir === 'asc' ? ' ↑' : ' ↓';
+  const fmtN = n => n ? n.toLocaleString() : '—';
+  const fmtR = n => n ? 'R' + n.toLocaleString() : '—';
+
+  let html = '<table class="rpt-tbl" style="min-width:960px;">';
+  html += '<thead><tr>'
+    + '<th class="rpt-sort" onclick="rptToggleSort()" style="min-width:140px;">Customer' + sortArrow + '</th>'
+    + '<th style="min-width:72px;">Style No</th>'
+    + '<th style="min-width:200px;">Description</th>'
+    + '<th class="rpt-num" style="min-width:72px;">Excl</th>'
+    + '<th class="rpt-num" style="min-width:72px;">Retail Incl</th>'
+    + '<th style="min-width:150px;">Colour</th>'
+    + '<th class="rpt-num">Sz 1</th><th class="rpt-num">Sz 2</th><th class="rpt-num">Sz 3</th>'
+    + '<th class="rpt-num">Sz 4</th><th class="rpt-num">Sz 5</th>'
+    + '<th class="rpt-num">Units</th>'
+    + '<th class="rpt-num" style="min-width:88px;">Val Excl</th>'
+    + '</tr></thead><tbody>';
+
+  sortedCusts.forEach(cid => {
+    const cg = custGroups[cid];
+    const sortedStyles = Object.keys(cg.styleGroups).sort((a,b) =>
+      cg.styleGroups[a].styleNo.localeCompare(cg.styleGroups[b].styleNo, undefined, {numeric:true})
+    );
+    let firstRowOfCust = true;
+    sortedStyles.forEach(sid => {
+      const sg = cg.styleGroups[sid];
+      sg.rows.forEach((row, ri) => {
+        const isFirstStyle = ri === 0;
+        const val = row.total * sg.exclPrice;
+        html += '<tr class="rpt-detail">'
+          + (firstRowOfCust && isFirstStyle
+              ? '<td style="font-size:11px;font-weight:800;color:var(--text);">' + cg.custName + '</td>'
+              : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-styleno">'  + sg.styleNo   + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-desc">'     + sg.styleDesc + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-num" style="font-size:11px;color:var(--text-mid);">R' + (sg.exclPrice||0).toLocaleString() + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-num" style="font-size:11px;color:var(--text-light);">R' + (sg.inclPrice||0).toLocaleString() + '</td>' : '<td></td>')
+          + '<td style="font-size:11px;color:var(--text-mid);">' + row.styleColour + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz1) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz2) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz3) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz4) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz5) + '</td>'
+          + '<td class="rpt-num" style="font-weight:700;">' + fmtN(row.total) + '</td>'
+          + '<td class="rpt-num">' + fmtR(val) + '</td>'
+          + '</tr>';
+        if (isFirstStyle) firstRowOfCust = false;
+      });
+    });
+    html += '<tr class="rpt-subtotal">'
+      + '<td colspan="6" style="font-size:10px;letter-spacing:1px;">' + cg.custName.toUpperCase() + ' TOTAL</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct1) + '</td><td class="rpt-num">' + fmtN(cg.ct2) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct3) + '</td><td class="rpt-num">' + fmtN(cg.ct4) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct5) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ctot) + '</td>'
+      + '<td class="rpt-num">' + fmtR(cg.cval) + '</td>'
+      + '</tr>';
+  });
+
+  html += '<tr class="rpt-grand-spacer"><td colspan="13"></td></tr>';
+  html += '<tr class="rpt-grand">'
+    + '<td colspan="6" style="font-size:10px;letter-spacing:2px;">GRAND TOTAL</td>'
+    + '<td class="rpt-num">' + gt1 + '</td><td class="rpt-num">' + gt2 + '</td>'
+    + '<td class="rpt-num">' + gt3 + '</td><td class="rpt-num">' + gt4 + '</td>'
+    + '<td class="rpt-num">' + gt5 + '</td>'
+    + '<td class="rpt-num">' + gtot + '</td>'
+    + '<td class="rpt-num">' + fmtR(gval) + '</td>'
+    + '</tr>';
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+
+  RPT_DATA = { sortedCusts, custGroups, gt1, gt2, gt3, gt4, gt5, gtot, gval, type:'order-sheet' };
+  const exportBtn = document.getElementById('rpt-export-btn');
+  if (exportBtn) exportBtn.disabled = false;
+
+  const totalCusts = sortedCusts.length;
+  const totalLines = Object.values(custGroups).reduce((s,c) =>
+    s + Object.values(c.styleGroups).reduce((ss,sg) => ss + sg.rows.length, 0), 0);
+  document.getElementById('rpt-sub').textContent =
+    totalCusts + ' customer' + (totalCusts!==1?'s':'') + ' · ' + totalLines + ' lines · ' + gtot + ' units · R' + gval.toLocaleString();
+}
+
+function exportOrderSheetXLSX() {
+  if (!RPT_DATA || typeof XLSX === 'undefined') return;
+  const { sortedCusts, custGroups, gt1, gt2, gt3, gt4, gt5, gtot, gval } = RPT_DATA;
+  const aoa = [['Customer','Style No','Description','Excl Price','Retail Incl','Colour','Sz 1','Sz 2','Sz 3','Sz 4','Sz 5','Units','Val Excl']];
+
+  sortedCusts.forEach(cid => {
+    const cg = custGroups[cid];
+    const sortedStyles = Object.keys(cg.styleGroups).sort((a,b) =>
+      cg.styleGroups[a].styleNo.localeCompare(cg.styleGroups[b].styleNo, undefined, {numeric:true}));
+    let firstRow = true;
+    sortedStyles.forEach(sid => {
+      const sg = cg.styleGroups[sid];
+      sg.rows.forEach((row, ri) => {
+        aoa.push([
+          firstRow && ri===0 ? cg.custName : '',
+          ri===0 ? sg.styleNo   : '',
+          ri===0 ? sg.styleDesc : '',
+          ri===0 ? sg.exclPrice : '',
+          ri===0 ? sg.inclPrice : '',
+          row.styleColour,
+          row.sz1||'', row.sz2||'', row.sz3||'', row.sz4||'', row.sz5||'',
+          row.total||'', row.total * sg.exclPrice
+        ]);
+        if (ri===0) firstRow = false;
+      });
+    });
+    aoa.push([cg.custName.toUpperCase() + ' TOTAL','','','','','', cg.ct1, cg.ct2, cg.ct3, cg.ct4, cg.ct5, cg.ctot, cg.cval]);
+  });
+  aoa.push([]);
+  aoa.push(['GRAND TOTAL','','','','','', gt1, gt2, gt3, gt4, gt5, gtot, gval]);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:28},{wch:10},{wch:28},{wch:10},{wch:10},{wch:22},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:8},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  const rangeEl = document.getElementById('rpt-range');
+  const rangeLabel = rangeEl?.options[rangeEl.selectedIndex]?.text || 'All';
+  XLSX.utils.book_append_sheet(wb, ws, 'Order Sheet');
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'Order_Sheet_' + rangeLabel.replace(/[^a-zA-Z0-9]/g,'_') + '_' + date + '.xlsx');
+}
+
+/* ── PACKING LIST BY CUSTOMER ─────────────────── */
+function renderPackingList() {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+  if (!D.orders.length || !D.lines.length) {
+    content.innerHTML = '<div class="rpt-empty">Loading data…</div>'; return;
+  }
+  content.innerHTML = '<div class="rpt-empty" style="padding:20px 0;">Building report…</div>';
+  api(T.cmts, [F.cmtName, F.cmtCode]).then(cmtRecs => {
+    _renderPackingListInner(cmtRecs);
+  }).catch(() => _renderPackingListInner([]));
+}
+
+function _renderPackingListInner(cmtRecs) {
+  const content = document.getElementById('rpt-content');
+  if (!content) return;
+  const rangeId = document.getElementById('rpt-range')?.value || '';
+  const custGroups = _buildCustGroups(cmtRecs, rangeId);
+
+  if (!Object.keys(custGroups).length) {
+    content.innerHTML = '<div class="rpt-empty">No orders found' + (rangeId ? ' for this range' : '') + '.</div>';
+    document.getElementById('rpt-sub').textContent = 'No data';
+    return;
+  }
+
+  // Sort customers A→Z (or Z→A)
+  const sortedCusts = Object.keys(custGroups).sort((a,b) => {
+    const cmp = custGroups[a].custName.localeCompare(custGroups[b].custName);
+    return RPT_SORT.dir === 'asc' ? cmp : -cmp;
+  });
+
+  // Sort styles within each customer
+  sortedCusts.forEach(cid => {
+    const sg = custGroups[cid].styleGroups;
+    Object.keys(sg).forEach(sid => {
+      sg[sid].rows.sort((a,b) => a.styleColour.localeCompare(b.styleColour));
+    });
+  });
+
+  // Grand totals
+  let gt1=0,gt2=0,gt3=0,gt4=0,gt5=0,gtot=0,gval=0;
+  sortedCusts.forEach(cid => { const c=custGroups[cid]; gt1+=c.ct1;gt2+=c.ct2;gt3+=c.ct3;gt4+=c.ct4;gt5+=c.ct5;gtot+=c.ctot;gval+=c.cval; });
+
+  const sortArrow = RPT_SORT.dir === 'asc' ? ' ↑' : ' ↓';
+  const fmtN = n => n ? n.toLocaleString() : '—';
+  const fmtR = n => n ? 'R' + n.toLocaleString() : '—';
+  const thS = 'text-align:right;';
+
+  let html = '<table class="rpt-tbl" style="min-width:1000px;">';
+  html += '<thead><tr>'
+    + '<th class="rpt-sort" onclick="rptToggleSort()" style="min-width:140px;">Customer' + sortArrow + '</th>'
+    + '<th style="min-width:72px;">Style No</th>'
+    + '<th style="min-width:80px;">CMT Code</th>'
+    + '<th style="min-width:180px;">Description</th>'
+    + '<th class="rpt-num" style="min-width:72px;">Excl Price</th>'
+    + '<th style="min-width:150px;">Colour</th>'
+    + '<th class="rpt-num">Sz 1</th><th class="rpt-num">Sz 2</th><th class="rpt-num">Sz 3</th>'
+    + '<th class="rpt-num">Sz 4</th><th class="rpt-num">Sz 5</th>'
+    + '<th class="rpt-num">Units</th>'
+    + '<th class="rpt-num" style="min-width:88px;">W/Sale Value</th>'
+    + '</tr></thead><tbody>';
+
+  sortedCusts.forEach((cid, ci) => {
+    const cg = custGroups[cid];
+    const sortedStyles = Object.keys(cg.styleGroups).sort((a,b) =>
+      cg.styleGroups[a].styleNo.localeCompare(cg.styleGroups[b].styleNo, undefined, {numeric:true})
+    );
+    let firstRowOfCust = true;
+    sortedStyles.forEach(sid => {
+      const sg = cg.styleGroups[sid];
+      sg.rows.forEach((row, ri) => {
+        const isFirstStyle = ri === 0;
+        const val = row.total * row.exclPrice;
+        html += '<tr class="rpt-detail">'
+          + (firstRowOfCust && isFirstStyle
+              ? '<td style="font-size:11px;font-weight:800;color:var(--text);">' + cg.custName + '</td>'
+              : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-styleno">'  + sg.styleNo  + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-supp">'     + (sg.cmtCode||'—') + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-desc">'     + sg.styleDesc + '</td>' : '<td></td>')
+          + (isFirstStyle ? '<td class="rpt-num" style="font-size:11px;color:var(--text-mid);">R' + (sg.exclPrice||0).toLocaleString() + '</td>' : '<td></td>')
+          + '<td style="font-size:11px;color:var(--text-mid);">' + row.styleColour + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz1) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz2) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz3) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz4) + '</td>'
+          + '<td class="rpt-num">' + fmtN(row.sz5) + '</td>'
+          + '<td class="rpt-num" style="font-weight:700;">' + fmtN(row.total) + '</td>'
+          + '<td class="rpt-num">' + fmtR(val) + '</td>'
+          + '</tr>';
+        if (isFirstStyle) firstRowOfCust = false;
+      });
+    });
+    // Customer subtotal
+    html += '<tr class="rpt-subtotal">'
+      + '<td colspan="6" style="font-size:10px;letter-spacing:1px;">' + cg.custName.toUpperCase() + ' TOTAL</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct1) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct2) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct3) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct4) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ct5) + '</td>'
+      + '<td class="rpt-num">' + fmtN(cg.ctot) + '</td>'
+      + '<td class="rpt-num">' + fmtR(cg.cval) + '</td>'
+      + '</tr>';
+  });
+
+  html += '<tr class="rpt-grand-spacer"><td colspan="13"></td></tr>';
+  html += '<tr class="rpt-grand">'
+    + '<td colspan="6" style="font-size:10px;letter-spacing:2px;">GRAND TOTAL</td>'
+    + '<td class="rpt-num">' + gt1 + '</td><td class="rpt-num">' + gt2 + '</td>'
+    + '<td class="rpt-num">' + gt3 + '</td><td class="rpt-num">' + gt4 + '</td>'
+    + '<td class="rpt-num">' + gt5 + '</td>'
+    + '<td class="rpt-num">' + gtot + '</td>'
+    + '<td class="rpt-num">' + fmtR(gval) + '</td>'
+    + '</tr>';
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+
+  RPT_DATA = { sortedCusts, custGroups, gt1, gt2, gt3, gt4, gt5, gtot, gval, type:'packing-list' };
+  const exportBtn = document.getElementById('rpt-export-btn');
+  if (exportBtn) exportBtn.disabled = false;
+
+  const totalCusts = sortedCusts.length;
+  const totalLines = Object.values(custGroups).reduce((s,c) =>
+    s + Object.values(c.styleGroups).reduce((ss,sg) => ss + sg.rows.length, 0), 0);
+  document.getElementById('rpt-sub').textContent =
+    totalCusts + ' customer' + (totalCusts!==1?'s':'') + ' · ' + totalLines + ' lines · ' + gtot + ' units · R' + gval.toLocaleString();
+}
+
+function exportPackingListXLSX() {
+  if (!RPT_DATA || typeof XLSX === 'undefined') return;
+  const { sortedCusts, custGroups, gt1, gt2, gt3, gt4, gt5, gtot, gval } = RPT_DATA;
+  const aoa = [['Customer','Style No','CMT Code','Description','Excl Price','Colour','Sz 1','Sz 2','Sz 3','Sz 4','Sz 5','Units','W/Sale Value']];
+
+  sortedCusts.forEach(cid => {
+    const cg = custGroups[cid];
+    const sortedStyles = Object.keys(cg.styleGroups).sort((a,b) =>
+      cg.styleGroups[a].styleNo.localeCompare(cg.styleGroups[b].styleNo, undefined, {numeric:true}));
+    let firstRow = true;
+    sortedStyles.forEach(sid => {
+      const sg = cg.styleGroups[sid];
+      sg.rows.forEach((row, ri) => {
+        aoa.push([
+          firstRow && ri===0 ? cg.custName : '',
+          ri===0 ? sg.styleNo   : '',
+          ri===0 ? (sg.cmtCode||'') : '',
+          ri===0 ? sg.styleDesc : '',
+          ri===0 ? sg.exclPrice : '',
+          row.styleColour,
+          row.sz1||'', row.sz2||'', row.sz3||'', row.sz4||'', row.sz5||'',
+          row.total||'', row.total * sg.exclPrice
+        ]);
+        if (ri===0) firstRow = false;
+      });
+    });
+    aoa.push([cg.custName.toUpperCase() + ' TOTAL','','','','','', cg.ct1, cg.ct2, cg.ct3, cg.ct4, cg.ct5, cg.ctot, cg.cval]);
+  });
+  aoa.push([]);
+  aoa.push(['GRAND TOTAL','','','','','', gt1, gt2, gt3, gt4, gt5, gtot, gval]);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:28},{wch:10},{wch:10},{wch:28},{wch:10},{wch:22},{wch:7},{wch:7},{wch:7},{wch:7},{wch:7},{wch:8},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  const rangeEl = document.getElementById('rpt-range');
+  const rangeLabel = rangeEl?.options[rangeEl.selectedIndex]?.text || 'All';
+  XLSX.utils.book_append_sheet(wb, ws, 'Packing List');
+  const date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'Packing_List_' + rangeLabel.replace(/[^a-zA-Z0-9]/g,'_') + '_' + date + '.xlsx');
+}
+
 function renderOrders() {
+  const filterStatus = document.getElementById('ord-filter-status')?.value || '';
+
+  // Archived orders: fetch fresh and re-render
+  if (filterStatus === 'Archived') {
+    document.getElementById('ord-body').innerHTML =
+      '<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;">Loading archived orders…</td></tr>';
+    api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore], ARCHONLY.orders)
+      .then(archivedOrders => _renderOrderRows(archivedOrders))
+      .catch(e => document.getElementById('ord-body').innerHTML = '<tr><td colspan="8" style="padding:32px;text-align:center;color:#dc2626;">Error: ' + e.message + '</td></tr>');
+    return;
+  }
+
+  _renderOrderRows(D.orders);
+}
+
+function _renderOrderRows(orders) {
+  const filterStatus = document.getElementById('ord-filter-status')?.value || '';
   const custMap = {}, styleMap = {};
   D.customers.forEach(c => custMap[c.id] = c);
   D.styles.forEach(s => styleMap[s.id] = s);
@@ -1697,9 +2524,8 @@ function renderOrders() {
   document.getElementById('ord-sub').textContent = D.orders.length + ' total · ' + conf + ' confirmed';
 
   // Status + text search filters
-  const filterStatus = document.getElementById('ord-filter-status')?.value || '';
   const searchQ = (document.getElementById('ord-search')?.value || '').trim().toLowerCase();
-  let rows = D.orders.filter(o => {
+  let rows = orders.filter(o => {
     if (filterStatus && sv(o, F.orderStatus) !== filterStatus) return false;
     return true;
   });
@@ -1756,6 +2582,7 @@ function renderOrders() {
       + '<td style="padding:10px 8px;text-align:right;font-size:13px;font-weight:700;">'+fmtRFull(val)+'</td>'
       + '<td style="padding:10px 12px;white-space:nowrap;">'+badge(status)
         + ' <button onclick="ordStatusOpen(\''+esc(o.id)+'\',\''+esc(sv(o,F.orderId))+'\',\''+esc(status)+'\',\''+esc(name)+'\')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:Montserrat,sans-serif;font-weight:700;color:var(--text-light);cursor:pointer;margin-left:5px;" onmouseover="this.style.borderColor=\'var(--pink)\';this.style.color=\'var(--pink)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--text-light)\'">Edit</button>'
+        + ' <button onclick="archiveOrder(\''+esc(o.id)+'\',\''+esc(sv(o,F.orderId))+'\',\''+esc(name)+'\')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:Montserrat,sans-serif;font-weight:700;color:var(--text-light);cursor:pointer;margin-left:3px;" onmouseover="this.style.borderColor=\'#d97706\';this.style.color=\'#d97706\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--text-light)\'">Archive</button>'
         + ' <button onclick="deleteOrder(\''+esc(o.id)+'\',\''+esc(sv(o,F.orderId))+'\',\''+esc(name)+'\','+lines.length+')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:Montserrat,sans-serif;font-weight:700;color:#dc2626;cursor:pointer;margin-left:3px;" onmouseover="this.style.borderColor=\'#dc2626\'" onmouseout="this.style.borderColor=\'var(--border)\'">Delete</button>'
         + '</td>'
       + '</tr>';
@@ -2257,11 +3084,11 @@ function ordEditRender() {
     + '<table style="width:100%;border-collapse:collapse;min-width:560px;">'
     + '<thead><tr>'
     + '<th style="'+thStyle+'">Style · Colour</th>'
-    + '<th style="'+thStyle+'text-align:center;">XS</th>'
-    + '<th style="'+thStyle+'text-align:center;">S</th>'
-    + '<th style="'+thStyle+'text-align:center;">M</th>'
-    + '<th style="'+thStyle+'text-align:center;">L</th>'
-    + '<th style="'+thStyle+'text-align:center;">XL</th>'
+    + '<th style="'+thStyle+'text-align:center;">Sz 1</th>'
+    + '<th style="'+thStyle+'text-align:center;">Sz 2</th>'
+    + '<th style="'+thStyle+'text-align:center;">Sz 3</th>'
+    + '<th style="'+thStyle+'text-align:center;">Sz 4</th>'
+    + '<th style="'+thStyle+'text-align:center;">Sz 5</th>'
     + '<th style="'+thStyle+'text-align:center;">Total</th>'
     + '<th style="'+thStyle+'"></th>'
     + '</tr></thead>'
@@ -2369,7 +3196,7 @@ async function ordEditSave() {
 
     ordEditClose();
     // Reload data and recalc fabric
-    D.orders = await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore]);
+    D.orders = await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore], NOARCH.orders);
     D.lines  = await api(T.lines,  [F.lineId,F.lineOrder,F.lineStyle,F.lineXS,F.lineS,F.lineM,F.lineL,F.lineXL,F.lineTotal,F.lineExcl,F.lineIncl]);
     renderOrders(); renderDash(); renderProd();
     recalcFabricCommitted();
@@ -2418,7 +3245,7 @@ async function ordStatusSave() {
     if (!r.ok) throw new Error(await r.text());
     ordStatusClose();
     // Reload orders fresh from Airtable to avoid stale local-state issues
-    D.orders = await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore]);
+    D.orders = await api(T.orders, [F.orderId,F.orderCust,F.orderStatus,F.orderDate,F.orderReqDate,F.orderRef,F.orderLines,F.orderPeriod,F.orderDiscount,F.orderStore], NOARCH.orders);
     renderOrders(); renderDash();
   } catch(e) { ordStatusClose(); showErr('Failed to update: '+e.message); }
 }
@@ -2450,7 +3277,7 @@ function renderProd() {
   });
 
   const totalUnits = Object.values(byStyle).reduce((s,v) => s+v.total, 0);
-  const pend = D.cutsheets.filter(cs => sv(cs, F.csStatus) === 'Pending').length;
+  const pend = D.cutsheets.filter(cs => sv(cs, F.csStatus) === 'Draft').length;
   const issued = D.cutsheets.filter(cs => sv(cs, F.csStatus) === 'Issued').length;
   const totalCS = D.cutsheets.length;
 
@@ -2465,7 +3292,7 @@ function renderProd() {
   D.cutsheets.forEach(cs => {
     const styleLinks = (cs.cellValuesByFieldId || cs.fields || {})['fld6SKRjatycQ8FFI'] || [];
     const sheetId = sv(cs, F.csId) || '';
-    const status  = sv(cs, F.csStatus) || 'Pending';
+    const status  = sv(cs, F.csStatus) || 'Draft';
     const isPS = sheetId.startsWith('PS-') || sheetId.startsWith('CS-');
     const isCS = sheetId.startsWith('CT-');
     styleLinks.forEach(link => {
@@ -2485,8 +3312,9 @@ function renderProd() {
   };
 
   // Sort entries
-  const selectedRange = document.getElementById('prod-range')?.value || '';
-  const statusWeight = s => s === 'Pending' ? 0 : s === 'Issued' ? 1 : 2;
+  const selectedRange  = document.getElementById('prod-range')?.value  || '';
+  const selectedStatus = document.getElementById('prod-status')?.value || '';
+  const statusWeight = s => s === 'Draft' ? 0 : s === 'Issued' ? 1 : 2;
   const entries = Object.entries(byStyle).map(([sid, agg]) => {
     const style = styleMap[sid];
     return {
@@ -2496,7 +3324,16 @@ function renderProd() {
       colour: style ? sv(style, F.styleColour): '—',
       rangeId: style ? getLinkedId((gv(style, F.styleRange)||[])[0]) : null,
     };
-  }).filter(e => !selectedRange || e.rangeId === selectedRange);
+  }).filter(e => {
+    if (!styleMap[e.sid]) return false; // style archived or not found — hide row
+    if (selectedRange && e.rangeId !== selectedRange) return false;
+    if (selectedStatus) {
+      const cs = csStatusByStyle[e.sid] || '';
+      const ps = psStatusByStyle[e.sid] || '';
+      if (cs !== selectedStatus && ps !== selectedStatus) return false;
+    }
+    return true;
+  });
   const { col, dir } = PROD_SORT;
   entries.sort((a, b) => {
     let av, bv;
@@ -2547,6 +3384,7 @@ function showTab(id, el) {
   if (id === 'ctregister' && !ctregLoaded) { ctregLoaded = true; ctregLoadCutters().then(() => ctregLoad()); }
   if (id === 'fabric' && !fabricLoaded) { fabricLoaded = true; fabricLoad(); }
   if (id === 'stylesetup') renderStyleSetup();
+  if (id === 'reports') initReports();
 }
 
 // ============================================================
@@ -2557,7 +3395,7 @@ let owRowCount = 0;
 
 async function owInit() {
   try {
-    const ranges = await api(T.ranges, [F.rangeNo, F.rangeName]);
+    const ranges = await api(T.ranges, [F.rangeNo, F.rangeName], NOARCH.ranges);
     console.log('Ranges fetched:', ranges.length, ranges[0]);
     const sel = document.getElementById('no-range');
     while (sel.options.length > 1) sel.remove(1);
@@ -2574,29 +3412,85 @@ async function owInit() {
 
   try {
     const custs = await api(T.customers, [F.custName, F.custStatus]);
-    const sel = document.getElementById('no-cust');
-    while (sel.options.length > 1) sel.remove(1);
+    const arr = [];
     custs.forEach(c => {
       const cb = c.cellValuesByFieldId || c.fields || {};
       const name = cb[F.custName] || '';
       const status = cb[F.custStatus];
       const statusName = (status && typeof status === 'object') ? status.name : status;
-      if (statusName === 'Active' && name) { const opt = new Option(name, String(c.id)); sel.add(opt); }
+      if (((statusName || '').toLowerCase() === 'active' || !statusName) && name) {
+        arr.push({ id: String(c.id), name });
+      }
     });
+    arr.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    CUST_COMBO = arr;
+    custComboRender(arr);
   } catch(e) { console.error('Customers error:', e); }
 }
+
+// ---- Searchable customer combobox ----
+let CUST_COMBO = [];      // [{id,name}] sorted A→Z
+let custComboActive = -1; // keyboard highlight index
+
+function custComboRender(list) {
+  const box = document.getElementById('no-cust-list');
+  if (!box) return;
+  const selId = document.getElementById('no-cust').value;
+  if (!list.length) { box.innerHTML = '<div class="cust-combo-empty">No matching customers</div>'; return; }
+  box.innerHTML = list.map((c, i) =>
+    '<div class="cust-combo-opt' + (c.id === selId ? ' sel' : '') + '" data-id="' + c.id + '" data-i="' + i +
+    '" onmousedown="custComboPick(\'' + c.id + '\')">' + c.name.replace(/</g,'&lt;') + '</div>'
+  ).join('');
+  custComboActive = -1;
+}
+function custComboOpen() {
+  custComboFilter(document.getElementById('no-cust-input').value);
+  document.getElementById('no-cust-list').classList.add('open');
+}
+function custComboClose() {
+  document.getElementById('no-cust-list').classList.remove('open');
+}
+function custComboFilter(q) {
+  const term = (q || '').trim().toLowerCase();
+  const list = term ? CUST_COMBO.filter(c => c.name.toLowerCase().includes(term)) : CUST_COMBO;
+  custComboRender(list);
+  document.getElementById('no-cust-list').classList.add('open');
+}
+function custComboPick(id) {
+  const c = CUST_COMBO.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('no-cust').value = id;
+  document.getElementById('no-cust-input').value = c.name;
+  custComboClose();
+}
+function custComboKey(e) {
+  const box = document.getElementById('no-cust-list');
+  const opts = [...box.querySelectorAll('.cust-combo-opt')];
+  if (e.key === 'ArrowDown') { e.preventDefault(); custComboActive = Math.min(custComboActive + 1, opts.length - 1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); custComboActive = Math.max(custComboActive - 1, 0); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (opts[custComboActive]) custComboPick(opts[custComboActive].dataset.id); return; }
+  else if (e.key === 'Escape') { custComboClose(); return; }
+  else return;
+  opts.forEach((o, i) => o.classList.toggle('active', i === custComboActive));
+  if (opts[custComboActive]) opts[custComboActive].scrollIntoView({ block: 'nearest' });
+}
+// Close combobox when clicking outside
+document.addEventListener('mousedown', (e) => {
+  const combo = document.getElementById('no-cust-combo');
+  if (combo && !combo.contains(e.target)) custComboClose();
+});
 
 async function noRangeChanged() {
   const sel = document.getElementById('no-range');
   const rangeId = sel.value;
-  if (!rangeId) { document.getElementById('no-grid-wrap').style.display='none'; document.getElementById('no-summary').style.display='none'; return; }
+  if (!rangeId) { document.getElementById('no-grid-wrap').style.display='none'; document.getElementById('no-summary').style.display='none'; const ss=document.getElementById('no-style-search'); if(ss){ss.innerHTML='<option value="">— All styles —</option>';ss.disabled=true;} return; }
   OW.rangeId = rangeId;
   OW.rangeName = sel.options[sel.selectedIndex].dataset.name || sel.options[sel.selectedIndex].text;
   document.getElementById('no-sub').textContent = OW.rangeName;
   document.getElementById('no-grid-wrap').innerHTML = '<div style="color:var(--text-light);font-size:13px;padding:16px 0">Loading styles...</div>';
 
   try {
-    const allStyles = await api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleSizes, F.styleRange, F.styleStatus, F.styleExcl, F.styleIncl]);
+    const allStyles = await api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleSizes, F.styleRange, F.styleStatus, F.styleExcl, F.styleIncl], NOARCH.styles);
     // Filter: match range OR just take all active if range filter returns nothing
     const filterByRange = allStyles.filter(s => {
       const cb = s.cellValuesByFieldId || s.fields || {};
@@ -2607,7 +3501,7 @@ async function noRangeChanged() {
       const cb = s.cellValuesByFieldId || s.fields || {};
       const stVal = cb[F.styleStatus];
       const stName = (stVal && typeof stVal === 'object') ? stVal.name : stVal;
-      return stName === 'Active' || !stName;
+      return (stName || '').toLowerCase() === 'active' || !stName;
     });
 
     console.log('All styles:', allStyles.length, '| In range:', filterByRange.length, '| Final active:', rangeStyles.length);
@@ -2630,46 +3524,25 @@ async function noRangeChanged() {
     
     console.log('Style map keys:', Object.keys(OW.styleMap));
 
-    // Split styles by sizing convention
-    const XS_SIZES = ['XS','S','M','L','XL'];
+    // Single Sz 1-5 sizing convention only
     const allKeys = Object.keys(OW.styleMap).sort((a, b) => {
       const [aDesc, aCol=''] = a.split(' · ');
       const [bDesc, bCol=''] = b.split(' · ');
       return aDesc.localeCompare(bDesc) || aCol.localeCompare(bCol);
     });
-    const xsKeys = allKeys.filter(k => {
-      const s = OW.styleMap[k].sizes;
-      if (!s.length) return true;
-      return s.every(sz => XS_SIZES.includes(sz));
-    });
-    const sizeKeys = allKeys.filter(k => !xsKeys.includes(k));
 
     document.getElementById('no-grid-wrap').innerHTML =
       '<table class="ow-grid" id="no-grid">' +
-      (xsKeys.length || !sizeKeys.length ? (
-        '<thead><tr>' +
-        '<th style="width:160px">Style &amp; Colourway</th>' +
-        '<th class="sz">XS</th><th class="sz">S</th><th class="sz">M</th><th class="sz">L</th><th class="sz">XL</th>' +
-        '<th class="tot">Total</th><th></th>' +
-        '</tr></thead>' +
-        '<tbody id="no-grid-body-xs"></tbody>'
-      ) : '') +
-      (xsKeys.length && sizeKeys.length ? (
-        '<tbody><tr><td colspan="8" style="padding:16px 0 4px;border-top:2px solid var(--border);"></td></tr></tbody>'
-      ) : '') +
-      (sizeKeys.length ? (
-        '<thead><tr>' +
-        '<th style="width:160px">Style &amp; Colourway</th>' +
-        '<th class="sz">Sz 1</th><th class="sz">Sz 2</th><th class="sz">Sz 3</th><th class="sz">Sz 4</th><th class="sz">Sz 5</th>' +
-        '<th class="tot">Total</th><th></th>' +
-        '</tr></thead>' +
-        '<tbody id="no-grid-body-sz"></tbody>'
-      ) : '') +
+      '<thead><tr>' +
+      '<th style="width:160px">Style &amp; Colourway</th>' +
+      '<th class="sz">Sz 1</th><th class="sz">Sz 2</th><th class="sz">Sz 3</th><th class="sz">Sz 4</th><th class="sz">Sz 5</th>' +
+      '<th class="tot">Total</th><th></th>' +
+      '</tr></thead>' +
+      '<tbody id="no-grid-body"></tbody>' +
       '</table>';
 
     owRowCount = 0;
     if (allKeys.length) {
-      // Build groups for each section
       const buildGroups = (keys, bodyId) => {
         const groups = {}, groupOrder = [];
         keys.forEach(k => {
@@ -2681,7 +3554,6 @@ async function noRangeChanged() {
         groupOrder.forEach(desc => {
           const colours = groups[desc];
           const gid = 'nogrp-' + desc.replace(/[^a-zA-Z0-9]/g, '-');
-          // Group header row
           const body = document.getElementById(bodyId);
           if (!body) return;
           const hdr = document.createElement('tr');
@@ -2695,23 +3567,30 @@ async function noRangeChanged() {
             '<span style="font-size:10px;color:var(--text-light);font-weight:600;">' + colours.length + ' colour' + (colours.length !== 1 ? 's' : '') + '</span>' +
             '</div></td>';
           body.appendChild(hdr);
-          // Colour rows
           colours.forEach(k => noAddRow(k, bodyId, gid));
         });
       };
-      buildGroups(xsKeys, 'no-grid-body-xs');
-      buildGroups(sizeKeys, 'no-grid-body-sz');
+      buildGroups(allKeys, 'no-grid-body');
     } else {
-      for (let i = 0; i < 5; i++) noAddRow(null, 'no-grid-body-xs');
+      for (let i = 0; i < 5; i++) noAddRow(null, 'no-grid-body');
     }
 
     document.getElementById('no-grid-wrap').style.display = 'block';
     document.getElementById('no-summary').style.display = 'flex';
+    // Populate and enable the Style filter dropdown
+    const styleSearchEl = document.getElementById('no-style-search');
+    if (styleSearchEl) {
+      const styleDescs = [...new Set(allKeys.map(k => { const sep = k.indexOf(' · '); return sep >= 0 ? k.substring(0, sep) : k; }))].sort();
+      styleSearchEl.innerHTML = '<option value="">— All styles —</option>'
+        + styleDescs.map(d => '<option value="' + d + '">' + d + '</option>').join('');
+      styleSearchEl.disabled = false;
+      styleSearchEl.value = '';
+    }
     noUpdate();
     // Double rAF: first frame lets DOM settle, second scrolls before focus can pull down
     requestAnimationFrame(() => requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      document.getElementById('no-cust').focus({ preventScroll: true });
+      document.getElementById('no-cust-input').focus({ preventScroll: true });
     }));
   } catch(e) {
     document.getElementById('no-grid-wrap').innerHTML = '<div style="color:#dc2626;font-size:13px;padding:16px 0">Error: ' + e.message + '</div>';
@@ -2720,15 +3599,10 @@ async function noRangeChanged() {
 
 function noAddRow(preKey, bodyId, groupId) {
   const idx = owRowCount++;
-  const body = document.getElementById(bodyId || 'no-grid-body-xs');
+  const body = document.getElementById(bodyId || 'no-grid-body');
   if (!body) return;
   const keys = Object.keys(OW.styleMap);
-
-  const XS_SIZES = ['XS','S','M','L','XL'];
-  const SZ_SIZES = ['Sz 1','Sz 2','Sz 3','Sz 4','Sz 5'];
-  const info = preKey ? OW.styleMap[preKey] : null;
-  const isXS = !info || !info.sizes.length || info.sizes.some(sz => XS_SIZES.includes(sz));
-  const sizeIds = isXS ? ['XS','S','M','L','XL'] : ['S1','S2','S3','S4','S5'];
+  const sizeIds = ['S1','S2','S3','S4','S5']; // always Sz 1-5
 
   const tr = document.createElement('tr');
   tr.id = 'nr-' + idx;
@@ -2737,7 +3611,6 @@ function noAddRow(preKey, bodyId, groupId) {
   // Style / colour cell
   const selTd = document.createElement('td');
   if (preKey && groupId) {
-    // Grouped mode — colour label + hidden select for data reads
     const sep = preKey.indexOf(' · ');
     const colourLabel = sep >= 0 ? preKey.substring(sep + 3) : preKey;
     selTd.style.paddingLeft = '20px';
@@ -2754,11 +3627,7 @@ function noAddRow(preKey, bodyId, groupId) {
     sel.onchange = function() { noStyleChanged(idx); };
     sel.onkeydown = function(e) { noKey(e, idx, 'style'); };
     sel.add(new Option('— select —', ''));
-    keys.filter(k => {
-      const si = OW.styleMap[k].sizes;
-      const kIsXS = !si.length || si.some(sz => XS_SIZES.includes(sz));
-      return isXS ? kIsXS : !kIsXS;
-    }).forEach(function(k) { const o = new Option(k, k); if (preKey === k) o.selected = true; sel.add(o); });
+    keys.forEach(function(k) { const o = new Option(k, k); if (preKey === k) o.selected = true; sel.add(o); });
     selTd.appendChild(sel);
   }
   tr.appendChild(selTd);
@@ -2820,6 +3689,26 @@ function noStyleChanged(idx) {
   noUpdate();
 }
 
+function noFilterStyles(q) {
+  const query = (q || '').trim();
+  document.querySelectorAll('.no-grp-hdr').forEach(hdr => {
+    const gid = hdr.id;
+    const nameEl = hdr.querySelector('span:nth-child(2)');
+    const name = (nameEl?.textContent || '').trim();
+    const match = !query || name === query;
+    hdr.style.display = match ? '' : 'none';
+    document.querySelectorAll(`tr[data-group="${gid}"]`).forEach(r => {
+      if (!match) r.style.display = 'none';
+      else if (query) r.style.display = '';
+      // else: leave as-is (respects manual collapse state)
+    });
+    if (query && match) {
+      const arrow = hdr.querySelector('.no-grp-arrow');
+      if (arrow) arrow.style.transform = '';
+    }
+  });
+}
+
 function noToggleGroup(gid, clickEl) {
   const rows = document.querySelectorAll('tr[data-group="' + gid + '"]');
   const isOpen = rows[0] ? rows[0].style.display !== 'none' : true;
@@ -2833,13 +3722,9 @@ function noDelRow(idx) { document.getElementById('nr-'+idx)?.remove(); noUpdate(
 function noKey(e, idx, field) {
   if (e.key !== 'Enter') return;
   e.preventDefault();
-  const sizes = ['XS','S','M','L','XL'];
+  const sizes = ['S1','S2','S3','S4','S5'];
   if (field === 'style') {
-    const key = document.getElementById('ns-style-'+idx)?.value;
-    const info = key ? OW.styleMap[key] : null;
-    const avail = info ? info.sizes : sizes;
-    const first = sizes.find(sz => avail.includes(sz));
-    if (first) document.getElementById('ns-'+first+'-'+idx)?.focus();
+    if (sizes[0]) document.getElementById('ns-'+sizes[0]+'-'+idx)?.focus();
   } else {
     const cur = sizes.indexOf(field);
     let moved = false;
@@ -2857,7 +3742,7 @@ function noKey(e, idx, field) {
 
 function noRowHL(idx) {
   const tr = document.getElementById('nr-'+idx);
-  const total = ['XS','S','M','L','XL'].reduce((s,sz) => s + (parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0), 0);
+  const total = ['S1','S2','S3','S4','S5'].reduce((s,sz) => s + (parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0), 0);
   if (tr) tr.classList.toggle('has-qty', total > 0);
   const tot = document.getElementById('nr-tot-'+idx);
   if (tot) { tot.textContent = total || '—'; tot.style.color = total > 0 ? 'var(--pink)' : 'var(--text-light)'; }
@@ -2865,22 +3750,16 @@ function noRowHL(idx) {
 
 function noUpdate() {
   let units=0, styles=0, value=0;
-  const XS_IDS = ['XS','S','M','L','XL'];
-  const SZ_IDS = ['S1','S2','S3','S4','S5'];
-  ['no-grid-body-xs','no-grid-body-sz'].forEach(bodyId => {
-    const body = document.getElementById(bodyId);
-    if (!body) return;
-    const isXS = bodyId === 'no-grid-body-xs';
-    const sizeIds = isXS ? XS_IDS : SZ_IDS;
-    body.querySelectorAll('tr').forEach(tr => {
-      const idx = tr.id.replace('nr-','');
-      const key = document.getElementById('ns-style-'+idx)?.value || '';
-      const info = key ? OW.styleMap[key] : null;
-      const qty = sizeIds.reduce((s,sz) => s+(parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0), 0);
-      const tot = document.getElementById('nr-tot-'+idx);
-      if (tot) tot.textContent = qty > 0 ? qty : '—';
-      if (key && qty > 0) { styles++; units+=qty; value+=qty*(info?info.excl:0); }
-    });
+  const sizeIds = ['S1','S2','S3','S4','S5'];
+  const body = document.getElementById('no-grid-body');
+  if (body) body.querySelectorAll('tr').forEach(tr => {
+    const idx = tr.id.replace('nr-','');
+    const key = document.getElementById('ns-style-'+idx)?.value || '';
+    const info = key ? OW.styleMap[key] : null;
+    const qty = sizeIds.reduce((s,sz) => s+(parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0), 0);
+    const tot = document.getElementById('nr-tot-'+idx);
+    if (tot) tot.textContent = qty > 0 ? qty : '—';
+    if (key && qty > 0) { styles++; units+=qty; value+=qty*(info?info.excl:0); }
   });
   document.getElementById('no-total-units').textContent = units;
   document.getElementById('no-total-styles').textContent = styles;
@@ -2895,21 +3774,15 @@ async function noSubmit() {
   if (!custId) { noStatus('err','Select a customer.'); return; }
 
   const lines = [];
-  const XS_IDS = ['XS','S','M','L','XL'];
-  const SZ_IDS = ['S1','S2','S3','S4','S5'];
-  ['no-grid-body-xs','no-grid-body-sz'].forEach(bodyId => {
-    const body = document.getElementById(bodyId);
-    if (!body) return;
-    const isXS = bodyId === 'no-grid-body-xs';
-    const sizeIds = isXS ? XS_IDS : SZ_IDS;
-    body.querySelectorAll('tr').forEach(tr => {
-      const idx = tr.id.replace('nr-','');
-      const key = document.getElementById('ns-style-'+idx)?.value || '';
-      const info = key ? OW.styleMap[key] : null;
-      const qtys = sizeIds.map(sz => parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0);
-      const total = qtys.reduce((a,b) => a+b, 0);
-      if (key && total > 0) lines.push({ styleId: info?.id||null, key, qtys, total });
-    });
+  const sizeIds2 = ['S1','S2','S3','S4','S5'];
+  const submitBody = document.getElementById('no-grid-body');
+  if (submitBody) submitBody.querySelectorAll('tr').forEach(tr => {
+    const idx = tr.id.replace('nr-','');
+    const key = document.getElementById('ns-style-'+idx)?.value || '';
+    const info = key ? OW.styleMap[key] : null;
+    const qtys = sizeIds2.map(sz => parseInt(document.getElementById('ns-'+sz+'-'+idx)?.value||0)||0);
+    const total = qtys.reduce((a,b) => a+b, 0);
+    if (key && total > 0) lines.push({ styleId: info?.id||null, key, qtys, total });
   });
   if (!lines.length) { noStatus('err','No quantities entered.'); return; }
 
@@ -2949,6 +3822,7 @@ async function noSubmit() {
       if (another) {
         noReset();
         document.getElementById('no-cust').value = '';
+        document.getElementById('no-cust-input').value = '';
         document.getElementById('no-date').value = '';
         noStatus('', '');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2965,17 +3839,14 @@ function noStatus(type, msg) {
 }
 
 function noReset() {
-  ['no-grid-body-xs','no-grid-body-sz'].forEach(id => {
+  ['no-grid-body-xs','no-grid-body-sz','no-grid-body'].forEach(id => {
     const b = document.getElementById(id); if (b) b.innerHTML = '';
   });
   owRowCount = 0;
-  const XS_SIZES = ['XS','S','M','L','XL'];
   const allKeys = Object.keys(OW.styleMap).sort((a,b) => {
     const [aDesc,aCol=''] = a.split(' · '); const [bDesc,bCol=''] = b.split(' · ');
     return aDesc.localeCompare(bDesc) || aCol.localeCompare(bCol);
   });
-  const xsKeys   = allKeys.filter(k => { const s=OW.styleMap[k].sizes; return !s.length || s.every(sz=>XS_SIZES.includes(sz)); });
-  const sizeKeys = allKeys.filter(k => !xsKeys.includes(k));
   if (allKeys.length) {
     const buildGroups = (keys, bodyId) => {
       const groups = {}, groupOrder = [];
@@ -3000,10 +3871,9 @@ function noReset() {
         colours.forEach(k => noAddRow(k, bodyId, gid));
       });
     };
-    buildGroups(xsKeys, 'no-grid-body-xs');
-    buildGroups(sizeKeys, 'no-grid-body-sz');
+    buildGroups(allKeys, 'no-grid-body');
   } else {
-    for(let i=0;i<5;i++) noAddRow(null,'no-grid-body-xs');
+    for(let i=0;i<5;i++) noAddRow(null,'no-grid-body');
   }
   noUpdate();
   noStatus('','');
@@ -3226,7 +4096,16 @@ async function rangeModalOpen(recId) {
     } catch(e) { clear(); }
   } else { clear(); }
   document.getElementById('range-modal').style.display = 'flex';
+  const archBtn = document.getElementById('rm-archive-btn');
+  if (archBtn) archBtn.style.display = recId ? '' : 'none';
   setTimeout(() => document.getElementById('rm-no').focus(), 50);
+}
+
+function rangeModalArchive() {
+  const no   = document.getElementById('rm-no').value.trim();
+  const name = document.getElementById('rm-name').value.trim();
+  if (!RANGE_EDIT_ID) return;
+  archiveRange(RANGE_EDIT_ID, (no + ' · ' + name).trim());
 }
 
 function rangeModalClose() { document.getElementById('range-modal').style.display = 'none'; }
@@ -3377,7 +4256,7 @@ async function styleModalSave() {
       });
     }
     styleModalClose();
-    D.styles = await api(T.styles, [F.styleNo,F.styleDesc,F.styleColour,F.styleExcl,F.styleIncl,F.styleFabric,F.styleRating,F.styleRange,F.styleStatus,F.styleSizes,F.stylePastelGroup,F.stylePastelCategory,F.styleBarcode]);
+    D.styles = await api(T.styles, [F.styleNo,F.styleDesc,F.styleColour,F.styleExcl,F.styleIncl,F.styleFabric,F.styleRating,F.styleRange,F.styleStatus,F.styleSizes,F.stylePastelGroup,F.stylePastelCategory,F.styleBarcode,F.styleCMT]);
     renderStyleSetup();
   } catch(e) { document.getElementById('sm-msg').textContent = 'Save failed: '+e.message; }
   btn.disabled = false; btn.textContent = 'Save';
@@ -3509,8 +4388,8 @@ async function csLoadStyles() {
   list.innerHTML = '<div class="cs-empty">Loading…</div>';
   try {
     const [allStyles, rangeRecs, cmtRecs] = await Promise.all([
-      api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleStatus, F.styleRange]),
-      api(T.ranges, [F.rangeNo, F.rangeName]),
+      api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleStatus, F.styleRange], NOARCH.styles),
+      api(T.ranges, [F.rangeNo, F.rangeName], NOARCH.ranges),
       api(T.cmts, [CSF.cmtName])
     ]);
 
@@ -4156,10 +5035,27 @@ const RF = {
   csPatternNo:     'fldNRneguKbJKL0bQ', // Pattern # pulled from Style at save time
 };
 
+let REG_SORT   = { col: 'style', dir: 'asc' };
+let CTREG_SORT = { col: 'style', dir: 'asc' };
+
+function regSortBy(col) {
+  if (REG_SORT.col === col) REG_SORT.dir = REG_SORT.dir === 'asc' ? 'desc' : 'asc';
+  else { REG_SORT.col = col; REG_SORT.dir = 'asc'; }
+  regRender();
+}
+function ctregSortBy(col) {
+  if (CTREG_SORT.col === col) CTREG_SORT.dir = CTREG_SORT.dir === 'asc' ? 'desc' : 'asc';
+  else { CTREG_SORT.col = col; CTREG_SORT.dir = 'asc'; }
+  ctregRender();
+}
+
 async function regLoad() {
   try {
+    const regStatus = document.getElementById('reg-filter')?.value || '';
+    const regFormula = regStatus === 'Archived' ? ARCHONLY.cutsheets : NOARCH.cutsheets;
     const url = 'https://api.airtable.com/v0/' + BASE + '/' + T.cutsheets
       + '?returnFieldsByFieldId=true'
+      + '&filterByFormula=' + encodeURIComponent(regFormula)
       + Object.values(RF).map(id => '&fields[]=' + id).join('');
     let all = [], offset = null;
     do {
@@ -4172,6 +5068,7 @@ async function regLoad() {
     // PS Register only shows production sheets (PS- and legacy CS- prefixes), not cut sheets (CT-)
     REG.records = all.filter(r => !(r.fields?.[RF.csId] || '').startsWith('CT-'));
     REG.loaded = true;
+    D.ranges = await api(T.ranges, [F.rangeNo,F.rangeName,F.rangeSeason,F.rangeStatus,F.rangeLaunch,F.rangeDeadline,F.rangeDelivery,F.rangeNotes], NOARCH.ranges);
     populateRangeDropdowns();
     regRender();
   } catch(e) {
@@ -4192,8 +5089,7 @@ function regRender() {
   const rangeFilter = document.getElementById('reg-range')?.value || '';
   const rows = REG.records.filter(r => {
     const status = r.fields?.[RF.csStatus] || '';
-    if (filter === '__nottrash__' && status === 'Trash') return false;
-    if (filter && filter !== '__nottrash__' && status !== filter) return false;
+    if (filter && status !== filter) return false;
     if (rangeFilter) {
       const styleLinks = r.fields?.[RF.csStyleLink] || [];
       const sid = styleLinks[0] ? (typeof styleLinks[0] === 'string' ? styleLinks[0] : styleLinks[0].id) : null;
@@ -4207,37 +5103,37 @@ function regRender() {
   const total = psAll.length;
   const pending = psAll.filter(r => (r.fields?.[RF.csStatus]||'') === 'Pending').length;
   const issued = psAll.filter(r => (r.fields?.[RF.csStatus]||'') === 'Issued').length;
-  document.getElementById('reg-sub').textContent = total + ' production sheets · ' + pending + ' pending · ' + issued + ' issued';
+  document.getElementById('reg-sub').textContent = total + ' production sheets · ' + pending + ' draft · ' + issued + ' issued';
 
   if (!rows.length) {
     document.getElementById('reg-body').innerHTML = '<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;">' + (filter ? 'No ' + filter.toLowerCase() + ' production sheets' : 'No production sheets yet') + '</td></tr>';
     return;
   }
 
-  const sortBy = document.getElementById('reg-sort')?.value || 'style-colour';
+  const sortBy = REG_SORT.col;
+  const sortDir = REG_SORT.dir === 'asc' ? 1 : -1;
+  // Update sort arrows
+  ['style','colour','date'].forEach(c => {
+    const el = document.getElementById('reg-sort-' + c);
+    if (el) el.textContent = REG_SORT.col === c ? (REG_SORT.dir === 'asc' ? ' ↑' : ' ↓') : '';
+  });
 
   // Sort
   rows.sort((a, b) => {
     const fa = a.fields || {}, fb = b.fields || {};
-    if (sortBy === 'style-colour') {
-      const sa = (fa[RF.csStyleName]||'') + (fa[RF.csColour]||'');
-      const sb = (fb[RF.csStyleName]||'') + (fb[RF.csColour]||'');
-      return sa.localeCompare(sb);
-    }
-    if (sortBy === 'colour-style') {
-      const sa = (fa[RF.csColour]||'') + (fa[RF.csStyleName]||'');
-      const sb = (fb[RF.csColour]||'') + (fb[RF.csStyleName]||'');
-      return sa.localeCompare(sb);
-    }
-    // date desc
-    return (fb[RF.csIssueDate]||'').localeCompare(fa[RF.csIssueDate]||'');
+    let cmp = 0;
+    if (sortBy === 'style') cmp = ((fa[RF.csStyleName]||'')+(fa[RF.csColour]||'')).localeCompare((fb[RF.csStyleName]||'')+(fb[RF.csColour]||''));
+    else if (sortBy === 'colour') cmp = ((fa[RF.csColour]||'')+(fa[RF.csStyleName]||'')).localeCompare((fb[RF.csColour]||'')+(fb[RF.csStyleName]||''));
+    else if (sortBy === 'date') cmp = (fa[RF.csIssueDate]||'').localeCompare(fb[RF.csIssueDate]||'');
+    else cmp = ((fa[RF.csStyleName]||'')+(fa[RF.csColour]||'')).localeCompare((fb[RF.csStyleName]||'')+(fb[RF.csColour]||''));
+    return cmp * sortDir;
   });
 
   document.getElementById('reg-body').innerHTML = rows.map(r => {
     const f = r.fields || {};
     const id = f[RF.csId] || '—';
     const ver = f[RF.csVersion] || '—';
-    const status = f[RF.csStatus] || 'Pending';
+    const status = f[RF.csStatus] || 'Draft';
     const styleName = f[RF.csStyleName] || '—';
     const colour = f[RF.csColour] || '—';
     const total = f[RF.csTotal] || 0;
@@ -4280,7 +5176,7 @@ function regRender() {
       <td style="padding:10px 8px;vertical-align:middle;font-size:12px;color:var(--text-mid);">${issueDate}</td>
       <td style="padding:10px 8px;vertical-align:middle;">
         <select onchange="regUpdateStatus('${r.id}',this.value)" style="${statusStyle}">
-          <option ${status==='Pending'?'selected':''}>Pending</option>
+          <option ${status==='Draft'?'selected':''}>Draft</option>
           <option ${status==='Issued'?'selected':''}>Issued</option>
         </select>
       </td>
@@ -4291,6 +5187,7 @@ function regRender() {
           <button onclick="regPrint('${r.id}')" title="Print / Save PDF" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;">🖨</button>
           <a href="${mailHref}" title="${cmtEmail ? 'Email ' + cmtName : 'No email — add one in Airtable'}" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;${!cmtEmail ? 'opacity:0.4;cursor:not-allowed;pointer-events:none;' : ''}">✉</a>
           <button onclick="regDelete('${r.id}')" title="Delete" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:#dc2626;">🗑</button>
+          <button onclick="archiveSheet('${r.id}','${id}',true)" title="Archive" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#d97706;" onmouseover="this.style.color='#92400e'" onmouseout="this.style.color='#d97706'">⬜</button>
         </div>
       </td>
     </tr>`;
@@ -4396,7 +5293,7 @@ function regToggleAll(checked) {
   const filter = document.getElementById('reg-filter').value;
   const rows = REG.records.filter(r => {
     const status = r.fields?.[RF.csStatus] || '';
-    if (filter === '__nottrash__') return status !== 'Trash';
+    if (filter) return status === filter;
     if (filter === '') return true;
     return status === filter;
   });
@@ -4426,7 +5323,7 @@ function regBuildPrintHTML(recordId, photoUrl, attachUrl) {
   const rating = f[RF.csRating] ? Number(f[RF.csRating]).toFixed(3) : '—';
   const version = f[RF.csVersion] || '';
   const csId = f[RF.csId] || '—';
-  const status = (f[RF.csStatus] || 'Pending').toUpperCase();
+  const status = (f[RF.csStatus] || 'Draft').toUpperCase();
   const styleName = f[RF.csStyleName] || '—';
   const patternNo = f[RF.csPatternNo] || '—';
   const userNotes = (f[RF.csNotes] || '').trim();
@@ -4576,7 +5473,7 @@ function regBuildPrintHTML(recordId, photoUrl, attachUrl) {
       <thead>
         <tr>
           <th style="text-align:left;padding:6px 8px;">Colour</th>
-          <th class="rp-sz-h">XS</th><th class="rp-sz-h">S</th><th class="rp-sz-h">M</th><th class="rp-sz-h">L</th><th class="rp-sz-h">XL</th>
+          <th class="rp-sz-h">Sz 1</th><th class="rp-sz-h">Sz 2</th><th class="rp-sz-h">Sz 3</th><th class="rp-sz-h">Sz 4</th><th class="rp-sz-h">Sz 5</th>
           <th class="rp-tot">Total</th>
           <th class="rp-fab">Fabric req.</th>
         </tr>
@@ -5012,8 +5909,8 @@ async function ctLoadStyles() {
   list.innerHTML = '<div class="cs-empty">Loading…</div>';
   try {
     const [allStyles, rangeRecs, cutterRecs] = await Promise.all([
-      api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleStatus, F.styleRange]),
-      api(T.ranges, [F.rangeNo, F.rangeName]),
+      api(T.styles, [F.styleNo, F.styleDesc, F.styleColour, F.styleStatus, F.styleRange], NOARCH.styles),
+      api(T.ranges, [F.rangeNo, F.rangeName], NOARCH.ranges),
       api(T.cutters, [CTF.cutterName])
     ]);
 
@@ -5133,17 +6030,13 @@ async function ctSelectStyleNo(styleNo) {
     // Wholesale price (for order value calculation)
     const wholesale = sFields[F.styleExcl] || 0;
 
-    // Size convention
-    const firstSizesRaw = sFields[F.styleSizes] || [];
-    const firstSizes = firstSizesRaw.map(v => (v && typeof v === 'object') ? (v.name||v.value||'') : String(v)).filter(Boolean);
-    const XS_SIZES = ['XS','S','M','L','XL'];
-    const isXSConvention = !firstSizes.length || firstSizes.every(sz => XS_SIZES.includes(sz));
-    const sizeLabels = isXSConvention ? ['XS','S','M','L','XL'] : ['Sz 1','Sz 2','Sz 3','Sz 4','Sz 5'];
-
+    // Always Sz 1-5
+    const ctSizeLabels = ['Sz 1','Sz 2','Sz 3','Sz 4','Sz 5'];
     ['sz1','sz2','sz3','sz4','sz5'].forEach((id, i) => {
       const th = document.getElementById('ct-th-'+id);
-      if (th) th.textContent = sizeLabels[i];
+      if (th) th.textContent = ctSizeLabels[i];
     });
+    const isXSConvention = false; // Sz 1-5 only
 
     // Aggregate order lines per colourway
     ctLog('→ Aggregating order lines per colourway…');
@@ -5214,6 +6107,8 @@ async function ctSelectStyleNo(styleNo) {
     document.getElementById('ct-styleno').textContent = styleNo;
     document.getElementById('ct-desc').textContent = styleDesc || '—';
     document.getElementById('ct-fabric').textContent = fabricCode || '—';
+    const ctPatternEl = document.getElementById('ct-pattern-display');
+    if (ctPatternEl) ctPatternEl.textContent = ctPatternNo || '—';
     document.getElementById('ct-preview-title').textContent = ctId;
 
     // Cutter dropdown
@@ -5443,6 +6338,8 @@ function ctReset() {
   document.getElementById('ct-save-status').className = 'ow-status';
   document.getElementById('ct-save-status').textContent = '';
   document.getElementById('ct-notes').value = '';
+  const ctPat = document.getElementById('ct-pattern-display');
+  if (ctPat) ctPat.textContent = '—';
   ctBadge('Select a style to begin', 'var(--text-light)');
   ctSpinner(false);
   document.querySelectorAll('#ct-style-list .cs-style-item').forEach(el => el.classList.remove('selected'));
@@ -5484,8 +6381,11 @@ async function ctregLoad() {
       RF.csXS, RF.csS, RF.csM, RF.csL, RF.csXL, RF.csNotes, RF.csBreakdown,
       RF.csFabric, RF.csPatternNo, CTF.csCutterLink,
     ];
+    const ctStatus = document.getElementById('ctreg-filter')?.value || '';
+    const ctFormula = ctStatus === 'Archived' ? ARCHONLY.cutsheets : NOARCH.cutsheets;
     const url = 'https://api.airtable.com/v0/' + BASE + '/' + T.cutsheets
       + '?returnFieldsByFieldId=true'
+      + '&filterByFormula=' + encodeURIComponent(ctFormula)
       + fieldParams.map(id => '&fields[]=' + id).join('');
     let all = [], offset = null;
     do {
@@ -5498,6 +6398,7 @@ async function ctregLoad() {
     // Filter to only cut sheet records (CT- prefix)
     CTREG.records = all.filter(r => (r.fields?.[RF.csId] || '').startsWith('CT-'));
     CTREG.loaded = true;
+    D.ranges = await api(T.ranges, [F.rangeNo,F.rangeName,F.rangeSeason,F.rangeStatus,F.rangeLaunch,F.rangeDeadline,F.rangeDelivery,F.rangeNotes], NOARCH.ranges);
     populateRangeDropdowns();
     ctregRender();
   } catch(e) {
@@ -5518,8 +6419,7 @@ function ctregRender() {
   const rangeFilter = document.getElementById('ctreg-range')?.value || '';
   const rows = CTREG.records.filter(r => {
     const status = r.fields?.[RF.csStatus] || '';
-    if (filter === '__nottrash__' && status === 'Trash') return false;
-    if (filter && filter !== '__nottrash__' && status !== filter) return false;
+    if (filter && status !== filter) return false;
     if (rangeFilter) {
       const styleLinks = r.fields?.[RF.csStyleLink] || [];
       const sid = styleLinks[0] ? (typeof styleLinks[0] === 'string' ? styleLinks[0] : styleLinks[0].id) : null;
@@ -5531,25 +6431,33 @@ function ctregRender() {
   const total = CTREG.records.length;
   const pending = CTREG.records.filter(r => (r.fields?.[RF.csStatus]||'') === 'Pending').length;
   const issued = CTREG.records.filter(r => (r.fields?.[RF.csStatus]||'') === 'Issued').length;
-  document.getElementById('ctreg-sub').textContent = total + ' cut sheets · ' + pending + ' pending · ' + issued + ' issued';
+  document.getElementById('ctreg-sub').textContent = total + ' cut sheets · ' + pending + ' draft · ' + issued + ' issued';
 
   if (!rows.length) {
-    document.getElementById('ctreg-body').innerHTML = '<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;">' + (filter && filter !== '__nottrash__' ? 'No ' + filter.toLowerCase() + ' cut sheets' : 'No cut sheets yet') + '</td></tr>';
+    document.getElementById('ctreg-body').innerHTML = '<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;">' + (filter ? 'No ' + filter.toLowerCase() + ' cut sheets' : 'No cut sheets yet') + '</td></tr>';
     return;
   }
 
-  const sortBy = document.getElementById('ctreg-sort')?.value || 'style-colour';
+  const sortBy = CTREG_SORT.col;
+  const sortDir = CTREG_SORT.dir === 'asc' ? 1 : -1;
+  ['style','colour','date'].forEach(c => {
+    const el = document.getElementById('ctreg-sort-' + c);
+    if (el) el.textContent = CTREG_SORT.col === c ? (CTREG_SORT.dir === 'asc' ? ' ↑' : ' ↓') : '';
+  });
   rows.sort((a, b) => {
     const fa = a.fields || {}, fb = b.fields || {};
-    if (sortBy === 'style-colour') return ((fa[RF.csStyleName]||'')+(fa[RF.csColour]||'')).localeCompare((fb[RF.csStyleName]||'')+(fb[RF.csColour]||''));
-    if (sortBy === 'colour-style') return ((fa[RF.csColour]||'')+(fa[RF.csStyleName]||'')).localeCompare((fb[RF.csColour]||'')+(fb[RF.csStyleName]||''));
-    return (fb[RF.csIssueDate]||'').localeCompare(fa[RF.csIssueDate]||'');
+    let cmp = 0;
+    if (sortBy === 'style') cmp = ((fa[RF.csStyleName]||'')+(fa[RF.csColour]||'')).localeCompare((fb[RF.csStyleName]||'')+(fb[RF.csColour]||''));
+    else if (sortBy === 'colour') cmp = ((fa[RF.csColour]||'')+(fa[RF.csStyleName]||'')).localeCompare((fb[RF.csColour]||'')+(fb[RF.csStyleName]||''));
+    else if (sortBy === 'date') cmp = (fa[RF.csIssueDate]||'').localeCompare(fb[RF.csIssueDate]||'');
+    else cmp = ((fa[RF.csStyleName]||'')+(fa[RF.csColour]||'')).localeCompare((fb[RF.csStyleName]||'')+(fb[RF.csColour]||''));
+    return cmp * sortDir;
   });
 
   document.getElementById('ctreg-body').innerHTML = rows.map(r => {
     const f = r.fields || {};
     const id = f[RF.csId] || '—';
-    const status = f[RF.csStatus] || 'Pending';
+    const status = f[RF.csStatus] || 'Draft';
     const styleName = f[RF.csStyleName] || '—';
     const colour = f[RF.csColour] || '—';
     const total = f[RF.csTotal] || 0;
@@ -5589,7 +6497,7 @@ function ctregRender() {
       <td style="padding:10px 8px;vertical-align:middle;font-size:12px;color:var(--text-mid);">${issueDate}</td>
       <td style="padding:10px 8px;vertical-align:middle;">
         <select onchange="ctregUpdateStatus('${r.id}',this.value)" style="${statusStyle}">
-          <option ${status==='Pending'?'selected':''}>Pending</option>
+          <option ${status==='Draft'?'selected':''}>Draft</option>
           <option ${status==='Issued'?'selected':''}>Issued</option>
         </select>
       </td>
@@ -5600,6 +6508,7 @@ function ctregRender() {
           <button onclick="ctregPrint('${r.id}')" title="Print / Save PDF" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;">🖨</button>
           <a href="${ctMailHref}" title="${ctEmail ? 'Email ' + cutterName : 'No email — add one in Airtable'}" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;${!ctEmail ? 'opacity:0.4;cursor:not-allowed;pointer-events:none;' : ''}">✉</a>
           <button onclick="ctregDelete('${r.id}')" title="Delete" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:#dc2626;">🗑</button>
+          <button onclick="archiveSheet('${r.id}','${id}',false)" title="Archive" class="btn btn-s" style="padding:6px 9px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#d97706;" onmouseover="this.style.color='#92400e'" onmouseout="this.style.color='#d97706'">⬜</button>
         </div>
       </td>
     </tr>`;
@@ -5700,7 +6609,7 @@ function ctregBuildPrintHTML(recordId) {
   const rating = f[RF.csRating] ? Number(f[RF.csRating]).toFixed(3) : '—';
   const version = f[RF.csVersion] || '';
   const csId = f[RF.csId] || '—';
-  const status = (f[RF.csStatus] || 'Pending').toUpperCase();
+  const status = (f[RF.csStatus] || 'Draft').toUpperCase();
   const styleName = f[RF.csStyleName] || '—';
   const patternNo = f[RF.csPatternNo] || '—';
   const userNotes = (f[RF.csNotes] || '').trim();
@@ -5787,7 +6696,7 @@ function ctregBuildPrintHTML(recordId) {
       <thead>
         <tr>
           <th style="text-align:left;padding:6px 8px;">Colour</th>
-          <th class="rp-sz-h">XS</th><th class="rp-sz-h">S</th><th class="rp-sz-h">M</th><th class="rp-sz-h">L</th><th class="rp-sz-h">XL</th>
+          <th class="rp-sz-h">Sz 1</th><th class="rp-sz-h">Sz 2</th><th class="rp-sz-h">Sz 3</th><th class="rp-sz-h">Sz 4</th><th class="rp-sz-h">Sz 5</th>
           <th class="rp-tot">Total</th>
           <th class="rp-fab">Fabric req.</th>
         </tr>
@@ -5931,7 +6840,7 @@ async function recalcFabricCommitted() {
     }
 
     await fabricLoad(); // reload to show updated values
-    D.fabrics = await api(T.fabrics, [F.fabricCode,F.fabricDesc,F.fabricColour,F.fabricOnHand,F.fabricCommitted,F.fabricRemaining]);
+    D.fabrics = await api(T.fabrics, [F.fabricCode,F.fabricDesc,F.fabricColour,F.fabricOnHand,F.fabricCommitted,F.fabricRemaining,F.fabricStatus], NOARCH.fabrics);
     renderDash(); // refresh dashboard fabric alert
     if (btn) { btn.textContent = '✓ Done'; setTimeout(() => { if(btn) { btn.disabled=false; btn.textContent='⟳ Recalc Committed'; } }, 2000); }
   } catch(e) {
@@ -5953,6 +6862,10 @@ function fabricSort(col) {
 async function fabricLoad() {
   document.getElementById('fab-body').innerHTML =
     '<tr><td colspan="8" style="padding:32px;text-align:center;color:var(--text-light);font-size:13px;">Loading fabrics…</td></tr>';
+  const fabStatus = document.getElementById('fab-status')?.value || '';
+  const fabFilter = fabStatus === 'Archived' ? ARCHONLY.fabrics
+                  : fabStatus === 'Active'   ? 'AND(NOT({Fabric Status}="Archived"),{Fabric Status}="Active")'
+                  : NOARCH.fabrics;
   try {
     const fields = [
       F.fabricCode, F.fabricDesc, F.fabricColour, F.fabricSupplier,
@@ -5960,6 +6873,7 @@ async function fabricLoad() {
     ];
     const url = 'https://api.airtable.com/v0/' + BASE + '/' + T.fabrics
       + '?returnFieldsByFieldId=true'
+      + '&filterByFormula=' + encodeURIComponent(fabFilter)
       + fields.map(id => '&fields[]=' + id).join('');
     let all = [], offset = null;
     do {
